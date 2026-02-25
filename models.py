@@ -25,3 +25,14 @@ class Skills(Base):
     owner_id = Column(Integer, ForeignKey("users.id"))
 
     owner = relationship("Users", back_populates="skills")
+
+
+class Topics(Base):
+    __tablename__ = "topics"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, nullable=False)
+    description = Column(String, nullable=True)
+
+    skill_id = Column(Integer, ForeignKey("skills.id"))
+    owner_id = Column(Integer, ForeignKey("users.id"))
