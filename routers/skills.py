@@ -69,6 +69,26 @@ async def get_skill(
     
     return skill
 
+@router.put("/{skill_id}", status_code=status.HTTP_200_OK)
+async def update_skill(
+    db: db_dependency,
+    user: user_dependency,
+    skill_id: int = Path(gt=0),
+    skill_request: CreateSkillRequest = None
+):
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication failed")
+    
+    skill = db.query(Skills).filter(Skills.id == skill_id, Skills.owner_id == user.id).first()
+
+    if skill is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Skill not found")
+    
+    skill.name = skill_request.name
+    skill.description = skill_request.description
+
+    db.commit()
+
 @router.delete("/{skill_id}", status_code=status.HTTP_200_OK)
 async def delete_skill(
     db: db_dependency,
