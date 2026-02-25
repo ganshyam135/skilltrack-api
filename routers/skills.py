@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Path
 from pydantic import BaseModel
 from typing import Annotated
 from sqlalchemy.orm import Session
@@ -43,3 +43,19 @@ async def create_skill(
 
     db.add(skill_model)
     db.commit()
+
+@router.get("/{skill_id}", status_code=status.HTTP_200_OK)
+async def get_skill(
+    db: db_dependency,
+    user: user_dependency,
+    skill_id: int = Path(gt=0)
+):
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication failed")
+    
+    skill = db.query(Skills).filter(Skills.id == skill_id, Skills.owner_id == user.id).first()
+
+    if skill is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Skill not found")
+    
+    return skill
