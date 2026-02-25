@@ -65,3 +65,17 @@ async def create_topic(
 
     db.add(topic)
     db.commit()
+
+@router.get("/", status_code=status.HTTP_200_OK)
+async def get_topics(
+    db: db_dependency,
+    user: user_dependency
+):
+    if user is None:
+        raise HTTPException(status_code=401, detail="Authentication failed")
+    
+    topics = db.query(Topics).filter(Topics.owner_id == user.id).all()
+
+    return topics
+    
+    
