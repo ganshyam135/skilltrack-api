@@ -80,3 +80,73 @@ async def get_sessions(
     sessions = db.query(Sessions).filter(Sessions.owner_id == user.id).all()
 
     return sessions
+
+#get session by id
+@router.get("/{session_id}", status_code=status.HTTP_200_OK)
+async def get_session(
+    db: db_dependency,
+    user: user_dependency,
+    session_id: int = Path(gt=0)
+):
+
+    if user is None:
+        raise HTTPException(status_code=401, detail="Authentication failed")
+
+    session = db.query(Sessions).filter(
+        Sessions.id == session_id,
+        Sessions.owner_id == user.id
+    ).first()
+
+    if session is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    return session
+
+#update session
+@router.put("/{session_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def update_session(
+    db: db_dependency,
+    user: user_dependency,
+    session_id: int = Path(gt=0),
+    session_request: CreateSessionRequest = None
+):
+
+    if user is None:
+        raise HTTPException(status_code=401, detail="Authentication failed")
+
+    session = db.query(Sessions).filter(
+        Sessions.id == session_id,
+        Sessions.owner_id == user.id
+    ).first()
+
+    if session is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    session.duration = session_request.duration
+    session.notes = session_request.notes
+    session.topic_id = session_request.topic_id
+    session.skill_id = session_request.skill_id
+
+    db.commit()
+
+#delete session
+@router.delete("/{session_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_session(
+    db: db_dependency,
+    user: user_dependency,
+    session_id: int = Path(gt=0)
+    ):
+
+    if user is None:
+        raise HTTPException(status_code=401, detail="Authentication failed")
+
+    session = db.query(Sessions).filter(
+        Sessions.id == session_id,
+        Sessions.owner_id == user.id
+    ).first()
+
+    if session is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    db.delete(session)
+    db.commit()
