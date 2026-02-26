@@ -36,3 +36,16 @@ class Topics(Base):
 
     skill_id = Column(Integer, ForeignKey("skills.id"))
     owner_id = Column(Integer, ForeignKey("users.id"))
+
+
+class Sessions(Base):
+    __tablename__ = "sessions"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    duration = Column(Integer, nullable=False) #minutes
+    notes = Column(String, nullable=True)
+
+    topics_id = Column(Integer, ForeignKey("topics.id"))
+    skill_id = Column(Integer, ForeignKey("skills.id"))
+    owner_id = Column(Integer, ForeignKey("users.id"))
