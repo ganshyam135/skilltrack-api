@@ -93,7 +93,7 @@ async def update_skill(
 async def delete_skill(
     db: db_dependency,
     user: user_dependency,
-    skill_id: int = Path(gt=0)
+    skill_id: int = Path(gt=0)  
 ):
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication failed")
