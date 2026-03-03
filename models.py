@@ -1,6 +1,7 @@
 from database import Base
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
+from datetime import datetime
 
 
 class Users(Base):
@@ -45,6 +46,8 @@ class Sessions(Base):
 
     duration = Column(Integer, nullable=False) #minutes
     notes = Column(String, nullable=True)
+
+    created_at = Column(DateTime, default=datetime.utcnow)
 
     topics_id = Column(Integer, ForeignKey("topics.id"))
     skill_id = Column(Integer, ForeignKey("skills.id"))

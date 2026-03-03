@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
-SQLALCHEMY_DATABASE_URL = "postgresql://postgres:Down123Up%40@localhost:5433/skilltrack-apiApplicationDatabase"
+SQLALCHEMY_DATABASE_URL = "postgresql://postgres:Down123Up%40@localhost:5433/skilltrack"
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 

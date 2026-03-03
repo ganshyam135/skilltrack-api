@@ -113,3 +113,28 @@ async def get_skill_breakdown(
         {"skill": skill, "minutes": minutes}
         for skill, minutes in results
     ]
+
+
+#weekly summary endpoint
+@router.get("/weekly-summary", status_code=status.HTTP_200_OK)
+async def get_weekly_summary(
+    db: db_dependency,
+    user: user_dependency
+):
+    if user is None:
+        raise HTTPException(status_code=401, detail="Authentication failed")
+    
+    results = (
+        db.query(func.date(Sessions.created_at).label("date"),
+                 func.sum(Sessions.duration).label("total_minutes")
+        )
+        .filter(Sessions.owner_id == user.id)
+        .group_by(func.date(Sessions.created_at))
+        .order_by(func.date(Sessions.created_at))
+        .all()
+    )
+
+    return [
+        {'date': str(date), "minutes": minutes}
+        for date, minutes in results
+    ]
