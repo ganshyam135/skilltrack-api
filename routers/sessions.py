@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Path
+from fastapi import APIRouter, Depends, HTTPException, status, Path, Query
 from pydantic import BaseModel
 from typing import Annotated
 from sqlalchemy.orm import Session
@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from database import SessionLocal
 from models import Sessions, Topics, Skills, Users
 from routers.auth import get_current_user
+
 
 router = APIRouter(
     prefix="/sessions",
@@ -72,14 +73,21 @@ async def create_session(
 @router.get("/", status_code=status.HTTP_200_OK)
 async def get_sessions(
     db: db_dependency,
-    user: user_dependency
+    user: user_dependency,
+    limit: int = Query(10, le=100),
+    offset: int = Query(0, ge=0)
 ):
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication failed")
     
-    sessions = db.query(Sessions).filter(Sessions.owner_id == user.id).all()
+    return (db.query(Sessions)
+            .filter(Sessions.owner_id == user.id)
+            .offset(offset)
+            .limit(limit)
+            .all()
+            )
 
-    return sessions
+    
 
 #get session by id
 @router.get("/{session_id}", status_code=status.HTTP_200_OK)
