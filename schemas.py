@@ -1,0 +1,11 @@
+from pydantic import BaseModel
+from datetime import datetime
+
+class SkillResponse(BaseModel):
+    id: int
+    name: str
+    description: str | None = None
+    created_at: datetime | None = None
+
+    class Config:
+        from_attributes = True

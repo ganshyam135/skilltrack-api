@@ -7,6 +7,9 @@ from database import SessionLocal
 from models import Skills, Users
 from routers.auth import get_current_user
 
+from schemas import SkillResponse
+from typing import List
+
 router = APIRouter(
     prefix="/skills",
     tags=["skills"]
@@ -26,7 +29,7 @@ class CreateSkillRequest(BaseModel):
     name: str
     description: str | None = None
 
-@router.get("/", status_code=status.HTTP_200_OK)
+@router.get("/", status_code=status.HTTP_200_OK, response_model=List[SkillResponse])
 async def read_all_skills(
         db: db_dependency,
         user: user_dependency
@@ -53,7 +56,7 @@ async def create_skill(
     db.add(skill_model)
     db.commit()
 
-@router.get("/{skill_id}", status_code=status.HTTP_200_OK)
+@router.get("/{skill_id}", status_code=status.HTTP_200_OK, response_model=SkillResponse)
 async def get_skill(
     db: db_dependency,
     user: user_dependency,
@@ -89,7 +92,7 @@ async def update_skill(
 
     db.commit()
 
-@router.delete("/{skill_id}", status_code=status.HTTP_200_OK)
+@router.delete("/{skill_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_skill(
     db: db_dependency,
     user: user_dependency,

@@ -1,7 +1,8 @@
 from database import Base
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, UTC
+from sqlalchemy import DateTime
 
 
 class Users(Base):
@@ -24,6 +25,7 @@ class Skills(Base):
     description = Column(String, nullable=True)
 
     owner_id = Column(Integer, ForeignKey("users.id"))
+    created_at = Column(DateTime, default=datetime.now(UTC))
 
     owner = relationship("Users", back_populates="skills")
 
