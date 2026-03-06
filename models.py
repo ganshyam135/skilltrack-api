@@ -24,8 +24,8 @@ class Skills(Base):
     name = Column(String, index=True)
     description = Column(String, nullable=True)
 
-    owner_id = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.now(UTC))
+    owner_id = Column(Integer, ForeignKey("users.id"), index=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(UTC))
 
     owner = relationship("Users", back_populates="skills")
 
@@ -51,6 +51,6 @@ class Sessions(Base):
 
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    topics_id = Column(Integer, ForeignKey("topics.id"))
-    skill_id = Column(Integer, ForeignKey("skills.id"))
-    owner_id = Column(Integer, ForeignKey("users.id"))
+    topics_id = Column(Integer, ForeignKey("topics.id"), index=True)
+    skill_id = Column(Integer, ForeignKey("skills.id"), index=True)
+    owner_id = Column(Integer, ForeignKey("users.id"), index=True)
