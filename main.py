@@ -15,3 +15,7 @@ app.include_router(analytics.router)
 @app.get("/")
 async def root():
     return {"message": "SkillTrack API is running"}
+
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy"}
