@@ -10,6 +10,9 @@ from routers.auth import get_current_user
 from schemas import SkillResponse
 from typing import List
 
+import json
+from redis_client import redis_client
+
 router = APIRouter(
     prefix="/skills",
     tags=["skills"]
@@ -36,7 +39,30 @@ async def read_all_skills(
 ):
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication failed")
-    return db.query(Skills).filter(Skills.owner_id == user.id).all()
+    
+    cache_key = f"user_skills_{user.id}"
+
+    cached_skills = redis_client.get(cache_key)
+
+    if cached_skills:
+        return json.loads(cached_skills)
+    
+    skills = db.query(Skills).filter(Skills.owner_id == user.id).all()
+    
+    skills_data = [
+        {
+            "id": s.id,
+            "name": s.name,
+            "description": s.description,
+            "owner_id": s.owner_id,
+            "created_at": s.created_at.isoformat()
+        }
+        for s in skills
+    ]
+
+    redis_client.set(cache_key, json.dumps(skills_data), ex=300)
+
+    return skills_data
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_skill(
@@ -55,6 +81,7 @@ async def create_skill(
 
     db.add(skill_model)
     db.commit()
+    redis_client.delete(f"user_skills_{user.id}")
 
 @router.get("/{skill_id}", status_code=status.HTTP_200_OK, response_model=SkillResponse)
 async def get_skill(
