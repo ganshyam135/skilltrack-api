@@ -225,3 +225,102 @@ async def get_heatmap(
         }
         for data in heatmap_data
     ]
+
+
+@router.get("/ai-insights")
+async def get_ai_insights(
+    db: db_dependency,
+    user: user_dependency
+):
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication failed"
+        )
+    
+    insights = []
+
+    #Total Sessions
+    total_session = (
+        db.query(Sessions)
+        .filter(Sessions.owner_id == user.id)
+        .count()
+    )  
+
+    if total_session == 0:
+        return {
+            "insights": ["Start studying to generate insights."]
+        }
+    
+    #Most Studied Skill
+    most_studied_skill = (
+        db.query(
+            Skills.name,
+            func.sum(Sessions.duration).label("total_minutes")
+        )
+        .join(Sessions, Sessions.skill_id == Skills.id)
+        .filter(Sessions.owner_id == user.id)
+        .group_by(Skills.name)
+        .order_by(func.sum(Sessions.duration).desc())
+        .first()
+    )
+
+    if most_studied_skill:
+        insights.append(
+            f"{most_studied_skill.name} is your most studied skill."
+        )
+
+    #Total study time
+    total_time = (
+        db.query(func.sum(Sessions.duration))
+        .filter(Sessions.owner_id == user.id)
+        .scalar()
+    )
+
+    if total_time:
+        hours = round(total_time / 60, 1)
+
+        if hours >= 20:
+            insights.append(
+                "Excellent consistency! You have studied more than 20 hours."
+            )
+
+    #Weekend study detection
+    weekend_sessions = 0
+
+    sessions = (
+        db.query(Sessions)
+        .filter(Sessions.owner_id == user.id)
+        .all()
+    )
+
+    for session in sessions:
+        if session.created_at.weekday() >= 5:
+            weekend_sessions += 1
+
+    if weekend_sessions > 0:
+        insights.append(
+            "You are highly active during weekends."
+        )
+
+    #Streak insight
+    study_dates = sorted(
+        list(set(session.created_at.date() for session in sessions))
+    )
+
+    current_streak = 1
+
+    for i in range(1, len(study_dates)):
+
+        if study_dates[i] == study_dates[i - 1] + timedelta(days=1):
+            current_streak += 1
+        else: 
+            current_streak = 1
+
+    insights.append(
+        f"You currently have a {current_streak}-day learning streak."
+    )
+
+    return {
+        "insights": insights
+    }
