@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from typing import Annotated
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from datetime import date, datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone
 
 from database import SessionLocal
 from models import Sessions, Users, Skills
@@ -192,3 +192,36 @@ async def get_streak(
         "longest_streak": longest_streak,
         "last_study_date": latest_date
     }
+
+
+@router.get("/heatmap")
+async def get_heatmap(
+    db: db_dependency,
+    user: user_dependency
+):
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication failed"
+        )
+    
+    heatmap_data = (
+        db.query(
+            func.date(Sessions.created_at).label("date"),
+            func.count(Sessions.id).label("sessions"),
+            func.sum(Sessions.duration).label("total_minutes")
+        )
+        .filter(Sessions.owner_id == user.id)
+        .group_by(func.date(Sessions.created_at))
+        .order_by(func.date(Sessions.created_at))
+        .all()
+    )
+
+    return [
+        {
+            'date': str(data.date),
+            'sessions': data.sessions,
+            'total_minutes': data.total_minutes
+        }
+        for data in heatmap_data
+    ]
