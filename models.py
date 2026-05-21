@@ -54,3 +54,20 @@ class Sessions(Base):
     topics_id = Column(Integer, ForeignKey("topics.id"), index=True)
     skill_id = Column(Integer, ForeignKey("skills.id"), index=True)
     owner_id = Column(Integer, ForeignKey("users.id"), index=True)
+
+class Goals(Base):
+    __tablename__ = "goals"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    title = Column(String, nullable=False)
+
+    target_hours = Column(Integer, nullable=False)
+
+    start_date = Column(DateTime, nullable=False)
+
+    end_date = Column(DateTime, nullable=False)
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    owner_id = Column(Integer, ForeignKey("users.id"), index=True)
