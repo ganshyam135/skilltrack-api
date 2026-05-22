@@ -324,3 +324,80 @@ async def get_ai_insights(
     return {
         "insights": insights
     }
+
+
+@router.get("/achievements")
+async def get_achievements(
+    db: db_dependency,
+    user: user_dependency
+):
+
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication failed"
+        )
+
+    achievements = []
+
+    sessions = (
+        db.query(Sessions)
+        .filter(Sessions.owner_id == user.id)
+        .all()
+    )
+
+    if not sessions:
+        return {
+            "achievements": []
+        }
+
+    # Total study hours
+    total_minutes = sum(session.duration for session in sessions)
+
+    total_hours = total_minutes / 60
+
+    if total_hours >= 10:
+        achievements.append("🎯 10 Hour Learner")
+
+    if total_hours >= 50:
+        achievements.append("📚 50 Hour Grinder")
+
+    if total_hours >= 100:
+        achievements.append("🚀 100 Hour Master")
+
+    # Weekend sessions
+    weekend_sessions = 0
+
+    for session in sessions:
+        if session.created_at.weekday() >= 5:
+            weekend_sessions += 1
+
+    if weekend_sessions >= 5:
+        achievements.append("⚡ Weekend Learner")
+
+    # Streak achievement
+    study_dates = sorted(
+        list(set(session.created_at.date() for session in sessions))
+    )
+
+    longest_streak = 1
+    current_streak = 1
+
+    for i in range(1, len(study_dates)):
+
+        if study_dates[i] == study_dates[i - 1] + timedelta(days=1):
+            current_streak += 1
+            longest_streak = max(longest_streak, current_streak)
+
+        else:
+            current_streak = 1
+
+    if longest_streak >= 7:
+        achievements.append("🔥 7 Day Warrior")
+
+    if longest_streak >= 30:
+        achievements.append("👑 30 Day Legend")
+
+    return {
+        "achievements": achievements
+    }
