@@ -3,9 +3,10 @@ from sqlalchemy.orm import Session
 from typing import Annotated
 from pydantic import BaseModel
 from datetime import datetime
+from sqlalchemy import func
 
 from database import SessionLocal
-from models import Goals, Users
+from models import Goals, Users, Sessions
 from routers.auth import get_current_user
 
 router = APIRouter(
@@ -101,3 +102,57 @@ async def delete_goal(
 
     db.delete(goal)
     db.commit()
+
+
+@router.get("/progress/{goal_id}", status_code=status.HTTP_200_OK)
+async def get_goal_progress(
+    db: db_dependency,
+    user: user_dependency,
+    goal_id: int = Path(gt=0)
+):
+
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication failed"
+        )
+
+    goal = db.query(Goals).filter(
+        Goals.id == goal_id,
+        Goals.owner_id == user.id
+    ).first()
+
+    if goal is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Goal not found"
+        )
+
+    total_minutes = (
+        db.query(func.sum(Sessions.duration))
+        .filter(
+            Sessions.owner_id == user.id,
+            Sessions.created_at >= goal.start_date,
+            Sessions.created_at <= goal.end_date
+        )
+        .scalar()
+    )
+
+    total_minutes = total_minutes or 0
+
+    completed_hours = round(total_minutes / 60, 1)
+
+    if goal.target_hours == 0:
+        progress_percentage = 0
+    else:
+        progress_percentage = min(
+            round((completed_hours / goal.target_hours) * 100, 1),
+            100
+        )
+
+    return {
+        "goal": goal.title,
+        "target_hours": goal.target_hours,
+        "completed_hours": completed_hours,
+        "progress_percentage": progress_percentage
+    }
