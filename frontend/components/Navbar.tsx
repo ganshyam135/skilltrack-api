@@ -18,6 +18,13 @@ export default function Navbar() {
         >
           Login
         </Link>
+
+        <Link
+          href="/signup"
+          className="rounded-xl border border-gray-700 px-4 py-2 font-medium hover:bg-gray-900 transition"
+        >
+          Sign Up
+        </Link>
       </div>
     </nav>
   );
