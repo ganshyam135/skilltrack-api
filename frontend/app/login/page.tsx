@@ -6,6 +6,45 @@ export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async () => {
+    try {
+      setLoading(true);
+
+      const formData = new URLSearchParams();
+
+      formData.append("username", username);
+      formData.append("password", password);
+
+      const response = await fetch("http://localhost:8000/auth/login", {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem("token", data.access_token);
+
+        alert("Login successful!");
+      } else {
+        alert("Invalid credentials");
+      }
+    } catch (error) {
+      console.error(error);
+
+      alert("Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <main className="min-h-screen bg-black text-white flex items-center justify-center px-6">
       <div className="w-full max-w-md rounded-2xl border border-gray-800 bg-gray-950 p-8">
@@ -32,8 +71,12 @@ export default function LoginPage() {
             className="rounded-xl border border-gray-700 bg-black px-4 py-3 outline-none focus:border-purple-500"
           />
 
-          <button className="rounded-xl bg-white text-black py-3 font-medium hover:bg-gray-200 transition">
-            Login
+          <button
+            onClick={handleLogin}
+            disabled={loading}
+            className="rounded-xl bg-white text-black py-3 font-medium hover:bg-gray-200 transition disabled:opacity-50"
+          >
+            {loading ? "Logging in..." : "Login"}
           </button>
         </div>
       </div>
