@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from database import SessionLocal
 from models import Users
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from fastapi import Depends, HTTPException
 from passlib.context import CryptContext
 from typing import Annotated
@@ -56,7 +57,19 @@ async def create_user(
     )
 
     db.add(create_user_model)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError as error:
+        db.rollback()
+        detail = "Username or email already exists."
+        if hasattr(error.orig, 'diag') and getattr(error.orig.diag, 'constraint_name', None):
+            constraint = error.orig.diag.constraint_name
+            if constraint == "ix_users_username":
+                detail = "Username already exists."
+            elif constraint == "ix_users_email":
+                detail = "Email already exists."
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=detail)
+    return {"message": "User created successfully."}
 
 def authenticate_user(username: str, password: str, db):
     user = db.query(Users).filter(Users.username == username).first()
