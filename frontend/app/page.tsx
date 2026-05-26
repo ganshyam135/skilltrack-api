@@ -1,10 +1,15 @@
+import Navbar from "@/components/Navbar";
+import FeatureCard from "@/components/FeatureCard";
+
 export default function Home() {
   return (
     <main className="min-h-screen bg-black text-white">
-      <section className="flex flex-col items-center justify-center text-center px-6 py-32">
+      <Navbar />
+
+      <section className="flex flex-col items-center justify-center text-center px-6 py-28">
         <h1 className="text-6xl font-bold tracking-tight max-w-4xl">
           Track Your Learning
-          <span className="bg-gradient-to-r from-purple-400 to-blue-500 bg-clip-text text-transparent">
+          <span className="bg-linear-to-r from-purple-400 to-blue-500 bg-clip-text text-transparent">
             {" "}
             Like Never Before
           </span>
@@ -24,6 +29,23 @@ export default function Home() {
             Learn More
           </button>
         </div>
+      </section>
+
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-6 px-8 pb-24">
+        <FeatureCard
+          title="Analytics Dashboard"
+          description="Visualize your study habits with powerful charts and insights."
+        />
+
+        <FeatureCard
+          title="Goal Tracking"
+          description="Track learning goals and monitor progress over time."
+        />
+
+        <FeatureCard
+          title="AI Insights"
+          description="Receive intelligent recommendations powered by AI."
+        />
       </section>
     </main>
   );
