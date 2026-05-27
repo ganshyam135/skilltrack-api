@@ -1,7 +1,7 @@
 "use client";
 
 import Sidebar from "@/components/Sidebar";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
@@ -13,32 +13,27 @@ type Session = {
   created_at: string;
 };
 
-type Skill = {
-  id: number;
-  name: string;
-};
-
-type Topic = {
-  id: number;
-  title: string;
-  skill_id: number;
-};
-
 export default function SessionsPage() {
   const router = useRouter();
 
   const [duration, setDuration] = useState("");
   const [notes, setNotes] = useState("");
-  const [skillId, setSkillId] = useState("");
-  const [topicId, setTopicId] = useState("");
 
   const [sessions, setSessions] = useState<Session[]>([]);
-  const [skills, setSkills] = useState<Skill[]>([]);
-  const [topics, setTopics] = useState<Topic[]>([]);
 
   const [loading, setLoading] = useState(true);
 
-  const fetchSessions = useCallback(async (token: string) => {
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      router.push("/login");
+    } else {
+      fetchSessions(token);
+    }
+  }, [router]);
+
+  const fetchSessions = async (token: string) => {
     try {
       const response = await fetch(`${API_URL}/sessions`, {
         headers: {
@@ -51,75 +46,16 @@ export default function SessionsPage() {
       setSessions(data);
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
     }
-  }, []);
-
-  const fetchSkills = useCallback(async (token: string) => {
-    try {
-      const response = await fetch(`${API_URL}/skills`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const data = await response.json();
-
-      setSkills(data);
-    } catch (error) {
-      console.error(error);
-    }
-  }, []);
-
-  const fetchTopics = useCallback(async (token: string) => {
-    try {
-      const response = await fetch(`${API_URL}/topics`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const data = await response.json();
-
-      setTopics(data);
-    } catch (error) {
-      console.error(error);
-    }
-  }, []);
-
-  const fetchPageData = useCallback(
-    async (token: string) => {
-      try {
-        await Promise.all([
-          fetchSessions(token),
-          fetchSkills(token),
-          fetchTopics(token),
-        ]);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [fetchSessions, fetchSkills, fetchTopics]
-  );
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      router.push("/login");
-    } else {
-      fetchPageData(token);
-    }
-  }, [router, fetchPageData]);
+  };
 
   const handleCreateSession = async () => {
     try {
       const token = localStorage.getItem("token");
 
       if (!token) return;
-      if (!duration || !skillId || !topicId) {
-        alert("Please select a skill, topic, and duration");
-        return;
-      }
 
       const response = await fetch(`${API_URL}/sessions`, {
         method: "POST",
@@ -132,16 +68,12 @@ export default function SessionsPage() {
         body: JSON.stringify({
           duration: Number(duration),
           notes,
-          skill_id: Number(skillId),
-          topic_id: Number(topicId),
         }),
       });
 
       if (response.ok) {
         setDuration("");
         setNotes("");
-        setSkillId("");
-        setTopicId("");
 
         fetchSessions(token);
       } else {
@@ -151,10 +83,6 @@ export default function SessionsPage() {
       console.error(error);
     }
   };
-
-  const filteredTopics = skillId
-    ? topics.filter((topic) => topic.skill_id === Number(skillId))
-    : topics;
 
   if (loading) {
     return (
@@ -182,35 +110,6 @@ export default function SessionsPage() {
             <h2 className="text-2xl font-semibold">Add Study Session</h2>
 
             <div className="mt-6 flex flex-col gap-4">
-              <select
-                value={skillId}
-                onChange={(e) => {
-                  setSkillId(e.target.value);
-                  setTopicId("");
-                }}
-                className="rounded-xl border border-gray-700 bg-black px-4 py-3 outline-none focus:border-purple-500"
-              >
-                <option value="">Select skill</option>
-                {skills.map((skill) => (
-                  <option key={skill.id} value={skill.id}>
-                    {skill.name}
-                  </option>
-                ))}
-              </select>
-
-              <select
-                value={topicId}
-                onChange={(e) => setTopicId(e.target.value)}
-                className="rounded-xl border border-gray-700 bg-black px-4 py-3 outline-none focus:border-purple-500"
-              >
-                <option value="">Select topic</option>
-                {filteredTopics.map((topic) => (
-                  <option key={topic.id} value={topic.id}>
-                    {topic.title}
-                  </option>
-                ))}
-              </select>
-
               <input
                 type="number"
                 placeholder="Duration in minutes"

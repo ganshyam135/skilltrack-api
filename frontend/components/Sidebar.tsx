@@ -30,6 +30,13 @@ export default function Sidebar() {
         </Link>
 
         <Link
+          href="/topics"
+          className="rounded-xl px-4 py-3 text-gray-300 hover:bg-gray-900 hover:text-white transition"
+        >
+          Topics
+        </Link>
+
+        <Link
           href="/sessions"
           className="rounded-xl px-4 py-3 text-gray-300 hover:bg-gray-900 hover:text-white transition"
         >
