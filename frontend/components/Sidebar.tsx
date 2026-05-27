@@ -2,54 +2,75 @@
 
 import Link from "next/link";
 
+import { usePathname, useRouter } from "next/navigation";
+
 export default function Sidebar() {
+  const pathname = usePathname();
+
+  const router = useRouter();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+
+    router.push("/login");
+  };
+
+  const navItemClass = (path: string) => {
+    return `
+      rounded-xl px-4 py-3 transition font-medium
+      ${
+        pathname === path
+          ? "bg-white text-black"
+          : "text-gray-300 hover:bg-gray-900 hover:text-white"
+      }
+    `;
+  };
+
   return (
-    <aside className="w-64 min-h-screen border-r border-gray-800 bg-black p-6">
-      <h1 className="text-3xl font-bold text-white">SkillTrack</h1>
-
-      <nav className="mt-10 flex flex-col gap-3">
-        <Link
-          href="/dashboard"
-          className="rounded-xl px-4 py-3 text-gray-300 hover:bg-gray-900 hover:text-white transition"
-        >
-          Dashboard
+    <aside className="w-72 min-h-screen border-r border-gray-800 bg-black flex flex-col justify-between p-6">
+      <div>
+        <Link href="/">
+          <h1 className="text-3xl font-bold cursor-pointer">SkillTrack</h1>
         </Link>
 
+        <nav className="mt-10 flex flex-col gap-3">
+          <Link href="/dashboard" className={navItemClass("/dashboard")}>
+            Dashboard
+          </Link>
+
+          <Link href="/skills" className={navItemClass("/skills")}>
+            Skills
+          </Link>
+
+          <Link href="/sessions" className={navItemClass("/sessions")}>
+            Study Sessions
+          </Link>
+
+          <Link href="/goals" className={navItemClass("/goals")}>
+            Goals
+          </Link>
+
+          <Link href="/analytics" className={navItemClass("/analytics")}>
+            Analytics
+          </Link>
+        </nav>
+      </div>
+
+      <div className="flex flex-col gap-3">
         <Link
-          href="/goals"
-          className="rounded-xl px-4 py-3 text-gray-300 hover:bg-gray-900 hover:text-white transition"
+          href="/"
+          className="rounded-xl border border-gray-700 px-4 py-3 text-gray-300 hover:bg-gray-900 hover:text-white transition font-medium"
         >
-          Goals
+          Home
         </Link>
 
-        <Link
-          href="/skills"
-          className="rounded-xl px-4 py-3 text-gray-300 hover:bg-gray-900 hover:text-white transition"
+        <button
+          onClick={handleLogout}
+          className="rounded-xl bg-white text-black px-4 py-3 font-semibold hover:bg-gray-200 transition"
         >
-          Skills
-        </Link>
-
-        <Link
-          href="/topics"
-          className="rounded-xl px-4 py-3 text-gray-300 hover:bg-gray-900 hover:text-white transition"
-        >
-          Topics
-        </Link>
-
-        <Link
-          href="/sessions"
-          className="rounded-xl px-4 py-3 text-gray-300 hover:bg-gray-900 hover:text-white transition"
-        >
-          Study Sessions
-        </Link>
-
-        <Link
-          href="/analytics"
-          className="rounded-xl px-4 py-3 text-gray-300 hover:bg-gray-900 hover:text-white transition"
-        >
-          Analytics
-        </Link>
-      </nav>
+          Logout
+        </button>
+      </div>
     </aside>
   );
 }
