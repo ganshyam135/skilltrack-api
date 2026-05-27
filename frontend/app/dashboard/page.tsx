@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import DashboardCard from "@/components/DashboardCard";
 import WeeklyChart from "@/components/WeeklyChart";
+import Sidebar from "@/components/Sidebar";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -92,27 +93,38 @@ export default function DashboardPage() {
   }
 
   return (
-    <main className="min-h-screen bg-black text-white">
-      <div className="flex items-center justify-between px-8 py-6 border-b border-gray-800">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <button
-          onClick={handleLogout}
-          className="rounded-xl border border-gray-700 px-4 py-2 hover:bg-gray-900 transition"
-        >
-          Logout
-        </button>
+    <main className="min-h-screen bg-black text-white flex">
+      <Sidebar />
+      <div className="flex-1">
+        <div className="flex items-center justify-between px-8 py-8 border-b border-gray-800">
+          <div>
+            <h1 className="text-4xl font-bold">Dashboard</h1>
+            <p className="mt-2 text-gray-400">
+              Track your learning progress and productivity.
+            </p>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="rounded-xl border border-gray-700 px-4 py-2 hover:bg-gray-900 transition"
+          >
+            Logout
+          </button>
+        </div>
+
+        <section className="p-8 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+          <DashboardCard
+            title="Total Study Hours"
+            value={`${totalHours} hrs`}
+          />
+          <DashboardCard title="Current Streak" value={`${streak} days`} />
+          <DashboardCard title="Achievements" value={`${achievementCount}`} />
+          <DashboardCard title="Goals" value={`${goalCount}`} />
+        </section>
+
+        <section className="px-8 pb-10">
+          <WeeklyChart data={weeklyData} />
+        </section>
       </div>
-
-      <section className="p-8 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-        <DashboardCard title="Total Study Hours" value={`${totalHours} hrs`} />
-        <DashboardCard title="Current Streak" value={`${streak} days`} />
-        <DashboardCard title="Achievements" value={`${achievementCount}`} />
-        <DashboardCard title="Goals" value={`${goalCount}`} />
-      </section>
-
-      <section className="px-8 pb-10">
-        <WeeklyChart data={weeklyData} />
-      </section>
     </main>
   );
 }
