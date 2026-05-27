@@ -1,7 +1,7 @@
 "use client";
 
 import Sidebar from "@/components/Sidebar";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
@@ -23,17 +23,7 @@ export default function SessionsPage() {
 
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      router.push("/login");
-    } else {
-      fetchSessions(token);
-    }
-  }, [router]);
-
-  const fetchSessions = async (token: string) => {
+  const fetchSessions = useCallback(async (token: string) => {
     try {
       const response = await fetch(`${API_URL}/sessions`, {
         headers: {
@@ -49,7 +39,19 @@ export default function SessionsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      router.push("/login");
+    } else {
+      queueMicrotask(() => {
+        fetchSessions(token);
+      });
+    }
+  }, [router, fetchSessions]);
 
   const handleCreateSession = async () => {
     try {
@@ -78,6 +80,30 @@ export default function SessionsPage() {
         fetchSessions(token);
       } else {
         alert("Failed to create session");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleDeleteSession = async (sessionId: number) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      if (!token) return;
+
+      const response = await fetch(`${API_URL}/sessions/${sessionId}`, {
+        method: "DELETE",
+
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        fetchSessions(token);
+      } else {
+        alert("Failed to delete session");
       }
     } catch (error) {
       console.error(error);
@@ -156,6 +182,13 @@ export default function SessionsPage() {
                   </div>
 
                   <p className="mt-3 text-gray-400">{session.notes}</p>
+
+                  <button
+                    onClick={() => handleDeleteSession(session.id)}
+                    className="mt-4 rounded-xl border border-red-500 text-red-400 px-4 py-2 hover:bg-red-500 hover:text-white transition"
+                  >
+                    Delete
+                  </button>
                 </div>
               ))}
             </div>

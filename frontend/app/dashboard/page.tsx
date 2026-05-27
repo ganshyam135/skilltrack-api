@@ -36,12 +36,32 @@ export default function DashboardPage() {
         fetch(`${API_URL}/analytics/weekly-summary`, { headers }),
       ]);
 
-      if (!totalResponse.ok) throw new Error("Failed to fetch total time");
-      if (!streakResponse.ok) throw new Error("Failed to fetch streak");
-      if (!achievementResponse.ok)
-        throw new Error("Failed to fetch achievements");
-      if (!goalsResponse.ok) throw new Error("Failed to fetch goals");
-      if (!weeklyResponse.ok) throw new Error("Failed to fetch weekly summary");
+      const responses = [
+        { label: "total time", response: totalResponse },
+        { label: "streak", response: streakResponse },
+        { label: "achievements", response: achievementResponse },
+        { label: "goals", response: goalsResponse },
+        { label: "weekly summary", response: weeklyResponse },
+      ];
+
+      const unauthorized = responses.some(
+        ({ response }) => response.status === 401 || response.status === 403
+      );
+
+      if (unauthorized) {
+        localStorage.removeItem("token");
+        router.push("/login");
+        return;
+      }
+
+      for (const { label, response } of responses) {
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(
+            `Failed to fetch ${label}: ${response.status} ${errorText}`
+          );
+        }
+      }
 
       const [
         totalData,
@@ -67,7 +87,7 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -75,7 +95,9 @@ export default function DashboardPage() {
     if (!token) {
       router.push("/login");
     } else {
-      fetchDashboardData(token);
+      queueMicrotask(() => {
+        fetchDashboardData(token);
+      });
     }
   }, [router, fetchDashboardData]);
 
