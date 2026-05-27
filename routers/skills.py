@@ -1,10 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Path
 from pydantic import BaseModel
 from typing import Annotated
+from redis.exceptions import RedisError
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from database import SessionLocal
-from models import Skills, Users
+from models import Sessions, Skills, Topics, Users
 from routers.auth import get_current_user
 
 from schemas import SkillResponse
@@ -133,5 +135,33 @@ async def delete_skill(
     if skill is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Skill not found")
     
+    topic_ids = [
+        topic_id
+        for (topic_id,) in db.query(Topics.id).filter(
+            Topics.skill_id == skill_id,
+            Topics.owner_id == user.id
+        ).all()
+    ]
+
+    session_filters = [Sessions.skill_id == skill_id]
+
+    if topic_ids:
+        session_filters.append(Sessions.topics_id.in_(topic_ids))
+
+    db.query(Sessions).filter(
+        Sessions.owner_id == user.id,
+        or_(*session_filters)
+    ).delete(synchronize_session=False)
+
+    db.query(Topics).filter(
+        Topics.skill_id == skill_id,
+        Topics.owner_id == user.id
+    ).delete(synchronize_session=False)
+
     db.delete(skill)
     db.commit()
+
+    try:
+        redis_client.delete(f"user_skills_{user.id}")
+    except RedisError:
+        pass

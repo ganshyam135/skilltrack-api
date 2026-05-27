@@ -1,7 +1,7 @@
 "use client";
 
 import Sidebar from "@/components/Sidebar";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
@@ -22,17 +22,7 @@ export default function SkillsPage() {
 
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      router.push("/login");
-    } else {
-      fetchSkills(token);
-    }
-  }, [router]);
-
-  const fetchSkills = async (token: string) => {
+  const fetchSkills = useCallback(async (token: string) => {
     try {
       const response = await fetch(`${API_URL}/skills`, {
         headers: {
@@ -48,7 +38,19 @@ export default function SkillsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      router.push("/login");
+    } else {
+      queueMicrotask(() => {
+        fetchSkills(token);
+      });
+    }
+  }, [router, fetchSkills]);
 
   const handleCreateSkill = async () => {
     try {
@@ -77,6 +79,32 @@ export default function SkillsPage() {
         fetchSkills(token);
       } else {
         alert("Failed to create skill");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleDeleteSkill = async (skillId: number) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      if (!token) return;
+
+      const response = await fetch(`${API_URL}/skills/${skillId}`, {
+        method: "DELETE",
+
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        fetchSkills(token);
+      } else {
+        const errorData = await response.json();
+        console.error(errorData);
+        alert("Failed to delete skill");
       }
     } catch (error) {
       console.error(error);
@@ -142,11 +170,20 @@ export default function SkillsPage() {
               {skills.map((skill) => (
                 <div
                   key={skill.id}
-                  className="rounded-xl border border-gray-800 p-5"
+                  className="rounded-xl border border-gray-800 p-5 flex flex-col justify-between"
                 >
-                  <h3 className="text-2xl font-semibold">{skill.name}</h3>
+                  <div>
+                    <h3 className="text-2xl font-semibold">{skill.name}</h3>
 
-                  <p className="mt-3 text-gray-400">{skill.description}</p>
+                    <p className="mt-3 text-gray-400">{skill.description}</p>
+                  </div>
+
+                  <button
+                    onClick={() => handleDeleteSkill(skill.id)}
+                    className="mt-6 rounded-xl border border-red-500 text-red-400 px-4 py-2 hover:bg-red-500 hover:text-white transition"
+                  >
+                    Delete
+                  </button>
                 </div>
               ))}
             </div>
