@@ -1,84 +1,85 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import DashboardCard from "@/components/DashboardCard";
+import WeeklyChart from "@/components/WeeklyChart";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 export default function DashboardPage() {
   const router = useRouter();
 
   const [loading, setLoading] = useState(true);
-  const [totalHours, setTotalHours] = useState("0.0");
+  const [totalHours, setTotalHours] = useState<string>("0");
   const [streak, setStreak] = useState(0);
   const [achievementCount, setAchievementCount] = useState(0);
   const [goalCount, setGoalCount] = useState(0);
+  const [weeklyData, setWeeklyData] = useState([]);
+
+  const fetchDashboardData = useCallback(async (token: string) => {
+    try {
+      const headers = { Authorization: `Bearer ${token}` };
+
+      const [
+        totalResponse,
+        streakResponse,
+        achievementResponse,
+        goalsResponse,
+        weeklyResponse,
+      ] = await Promise.all([
+        fetch(`${API_URL}/analytics/total-time`, { headers }),
+        fetch(`${API_URL}/analytics/streak`, { headers }),
+        fetch(`${API_URL}/analytics/achievements`, { headers }),
+        fetch(`${API_URL}/goals`, { headers }),
+        fetch(`${API_URL}/analytics/weekly-summary`, { headers }),
+      ]);
+
+      if (!totalResponse.ok) throw new Error("Failed to fetch total time");
+      if (!streakResponse.ok) throw new Error("Failed to fetch streak");
+      if (!achievementResponse.ok)
+        throw new Error("Failed to fetch achievements");
+      if (!goalsResponse.ok) throw new Error("Failed to fetch goals");
+      if (!weeklyResponse.ok) throw new Error("Failed to fetch weekly summary");
+
+      const [
+        totalData,
+        streakData,
+        achievementData,
+        goalsData,
+        weeklyDataResponse,
+      ] = await Promise.all([
+        totalResponse.json(),
+        streakResponse.json(),
+        achievementResponse.json(),
+        goalsResponse.json(),
+        weeklyResponse.json(),
+      ]);
+
+      setTotalHours((totalData.total_minutes / 60).toFixed(1));
+      setStreak(streakData.current_streak);
+      setAchievementCount(achievementData.achievements.length);
+      setGoalCount(goalsData.length);
+      setWeeklyData(weeklyDataResponse);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
 
     if (!token) {
       router.push("/login");
-      return;
+    } else {
+      fetchDashboardData(token);
     }
-
-    const loadDashboard = async () => {
-      try {
-        const headers = {
-          Authorization: `Bearer ${token}`,
-        };
-
-        const [
-          totalResponse,
-          streakResponse,
-          achievementResponse,
-          goalsResponse,
-        ] = await Promise.all([
-          fetch("http://localhost:8000/analytics/total-time", { headers }),
-          fetch("http://localhost:8000/analytics/streak", { headers }),
-          fetch("http://localhost:8000/analytics/achievements", { headers }),
-          fetch("http://localhost:8000/goals/", { headers }),
-        ]);
-
-        if (
-          !totalResponse.ok ||
-          !streakResponse.ok ||
-          !achievementResponse.ok ||
-          !goalsResponse.ok
-        ) {
-          throw new Error("Failed to load dashboard data");
-        }
-
-        const [totalData, streakData, achievementData, goalsData] =
-          await Promise.all([
-            totalResponse.json(),
-            streakResponse.json(),
-            achievementResponse.json(),
-            goalsResponse.json(),
-          ]);
-
-        setTotalHours((Number(totalData.total_minutes ?? 0) / 60).toFixed(1));
-        setStreak(Number(streakData.current_streak ?? 0));
-        setAchievementCount(
-          Array.isArray(achievementData.achievements)
-            ? achievementData.achievements.length
-            : 0,
-        );
-        setGoalCount(Array.isArray(goalsData) ? goalsData.length : 0);
-      } catch (error) {
-        console.error(error);
-        localStorage.removeItem("token");
-        router.push("/login");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    void loadDashboard();
-  }, [router]);
+  }, [router, fetchDashboardData]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-
     router.push("/login");
   };
 
@@ -94,7 +95,6 @@ export default function DashboardPage() {
     <main className="min-h-screen bg-black text-white">
       <div className="flex items-center justify-between px-8 py-6 border-b border-gray-800">
         <h1 className="text-3xl font-bold">Dashboard</h1>
-
         <button
           onClick={handleLogout}
           className="rounded-xl border border-gray-700 px-4 py-2 hover:bg-gray-900 transition"
@@ -103,24 +103,15 @@ export default function DashboardPage() {
         </button>
       </div>
 
-      <section className="p-8">
-        <div className="rounded-2xl border border-gray-800 bg-gray-950 p-6">
-          <h2 className="text-2xl font-semibold">Welcome to SkillTrack</h2>
+      <section className="p-8 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        <DashboardCard title="Total Study Hours" value={`${totalHours} hrs`} />
+        <DashboardCard title="Current Streak" value={`${streak} days`} />
+        <DashboardCard title="Achievements" value={`${achievementCount}`} />
+        <DashboardCard title="Goals" value={`${goalCount}`} />
+      </section>
 
-          <p className="mt-3 text-gray-400">
-            Your personalized learning analytics dashboard is now active.
-          </p>
-        </div>
-
-        <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-          <DashboardCard title="Total Hours" value={`${totalHours}h`} />
-          <DashboardCard title="Current Streak" value={`${streak} days`} />
-          <DashboardCard
-            title="Achievements"
-            value={String(achievementCount)}
-          />
-          <DashboardCard title="Goals" value={String(goalCount)} />
-        </div>
+      <section className="px-8 pb-10">
+        <WeeklyChart data={weeklyData} />
       </section>
     </main>
   );
