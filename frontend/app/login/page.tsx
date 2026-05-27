@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const handleLogin = async () => {
     try {
@@ -32,7 +34,7 @@ export default function LoginPage() {
       if (response.ok) {
         localStorage.setItem("token", data.access_token);
 
-        alert("Login successful!");
+        router.push("/dashboard");
       } else {
         alert("Invalid credentials");
       }
