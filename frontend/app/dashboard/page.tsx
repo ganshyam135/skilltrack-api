@@ -8,6 +8,7 @@ import AIInsights from "@/components/AIInsights";
 import Sidebar from "@/components/Sidebar";
 import SkillBreakdown from "@/components/SkillBreakdown";
 import RecentActivity from "@/components/RecentActivity";
+import AchievementsCard from "@/components/AchievementsCard";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -23,6 +24,7 @@ export default function DashboardPage() {
   const [insights, setInsights] = useState<string[]>([]);
   const [skillBreakdown, setSkillBreakdown] = useState([]);
   const [recentSessions, setRecentSessions] = useState([]);
+  const [achievements, setAchievements] = useState<string[]>([]);
 
   const fetchDashboardData = useCallback(
     async (token: string) => {
@@ -102,6 +104,7 @@ export default function DashboardPage() {
         setTotalHours((totalData.total_minutes / 60).toFixed(1));
         setStreak(streakData.current_streak);
         setAchievementCount(achievementData.achievements.length);
+        setAchievements(achievementData.achievements);
         setGoalCount(goalsData.length);
         setWeeklyData(weeklyDataResponse);
         setInsights(aiInsightsData.insights);
@@ -184,6 +187,9 @@ export default function DashboardPage() {
 
         <section className="px-8 pb-10">
           <RecentActivity sessions={recentSessions} />
+        </section>
+        <section className="px-8 pb-10">
+          <AchievementsCard achievements={achievements} />
         </section>
       </div>
     </main>
