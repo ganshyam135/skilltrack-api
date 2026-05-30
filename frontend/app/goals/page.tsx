@@ -14,6 +14,13 @@ type Goal = {
   end_date: string;
 };
 
+type GoalProgress = {
+  goal: string;
+  target_hours: number;
+  completed_hours: number;
+  progress_percentage: number;
+};
+
 export default function GoalsPage() {
   const router = useRouter();
 
@@ -24,6 +31,9 @@ export default function GoalsPage() {
   const [endDate, setEndDate] = useState("");
 
   const [goals, setGoals] = useState<Goal[]>([]);
+  const [goalProgress, setGoalProgress] = useState<Record<number, GoalProgress>>(
+    {},
+  );
 
   const [loading, setLoading] = useState(true);
 
@@ -48,10 +58,35 @@ export default function GoalsPage() {
       const data = await response.json();
 
       setGoals(data);
+
+      for (const goal of data) {
+        fetchGoalProgress(token, goal.id);
+      }
     } catch (error) {
       console.error(error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchGoalProgress = async (token: string, goalId: number) => {
+    try {
+      const response = await fetch(`${API_URL}/goals/progress/${goalId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) return;
+
+      const data = await response.json();
+
+      setGoalProgress((prev) => ({
+        ...prev,
+        [goalId]: data,
+      }));
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -224,6 +259,30 @@ export default function GoalsPage() {
                         End: {new Date(goal.end_date).toLocaleDateString()}
                       </p>
                     </div>
+
+                    {goalProgress[goal.id] && (
+                      <div className="mt-5">
+                        <div className="flex justify-between text-sm mb-2">
+                          <span>
+                            {goalProgress[goal.id].completed_hours} /{" "}
+                            {goalProgress[goal.id].target_hours} hrs
+                          </span>
+
+                          <span>
+                            {goalProgress[goal.id].progress_percentage}%
+                          </span>
+                        </div>
+
+                        <div className="h-3 bg-gray-800 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-purple-500 transition-all"
+                            style={{
+                              width: `${goalProgress[goal.id].progress_percentage}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))
               )}
