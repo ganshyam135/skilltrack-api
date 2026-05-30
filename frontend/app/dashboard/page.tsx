@@ -7,6 +7,7 @@ import WeeklyChart from "@/components/WeeklyChart";
 import AIInsights from "@/components/AIInsights";
 import Sidebar from "@/components/Sidebar";
 import SkillBreakdown from "@/components/SkillBreakdown";
+import RecentActivity from "@/components/RecentActivity";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -21,6 +22,7 @@ export default function DashboardPage() {
   const [weeklyData, setWeeklyData] = useState([]);
   const [insights, setInsights] = useState<string[]>([]);
   const [skillBreakdown, setSkillBreakdown] = useState([]);
+  const [recentSessions, setRecentSessions] = useState([]);
 
   const fetchDashboardData = useCallback(
     async (token: string) => {
@@ -35,6 +37,7 @@ export default function DashboardPage() {
           weeklyResponse,
           aiInsightsResponse,
           skillBreakdownResponse,
+          recentSessionsResponse,
         ] = await Promise.all([
           fetch(`${API_URL}/analytics/total-time`, { headers }),
           fetch(`${API_URL}/analytics/streak`, { headers }),
@@ -43,6 +46,7 @@ export default function DashboardPage() {
           fetch(`${API_URL}/analytics/weekly-summary`, { headers }),
           fetch(`${API_URL}/analytics/ai-insights`, { headers }),
           fetch(`${API_URL}/analytics/skill-breakdown`, { headers }),
+          fetch(`${API_URL}/sessions?limit=5`, { headers }),
         ]);
 
         const responses = [
@@ -53,6 +57,7 @@ export default function DashboardPage() {
           { label: "weekly summary", response: weeklyResponse },
           { label: "AI insights", response: aiInsightsResponse },
           { label: "skill breakdown", response: skillBreakdownResponse },
+          { label: "recent sessions", response: recentSessionsResponse },
         ];
 
         const unauthorized = responses.some(
@@ -82,6 +87,7 @@ export default function DashboardPage() {
           weeklyDataResponse,
           aiInsightsData,
           skillBreakdownData,
+          recentSessionsData,
         ] = await Promise.all([
           totalResponse.json(),
           streakResponse.json(),
@@ -90,6 +96,7 @@ export default function DashboardPage() {
           weeklyResponse.json(),
           aiInsightsResponse.json(),
           skillBreakdownResponse.json(),
+          recentSessionsResponse.json(),
         ]);
 
         setTotalHours((totalData.total_minutes / 60).toFixed(1));
@@ -99,6 +106,7 @@ export default function DashboardPage() {
         setWeeklyData(weeklyDataResponse);
         setInsights(aiInsightsData.insights);
         setSkillBreakdown(skillBreakdownData);
+        setRecentSessions(recentSessionsData);
       } catch (error) {
         console.error(error);
       } finally {
@@ -172,6 +180,10 @@ export default function DashboardPage() {
 
         <section className="px-8 pb-10">
           <SkillBreakdown data={skillBreakdown} />
+        </section>
+
+        <section className="px-8 pb-10">
+          <RecentActivity sessions={recentSessions} />
         </section>
       </div>
     </main>
