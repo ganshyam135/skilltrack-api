@@ -92,6 +92,29 @@ export default function GoalsPage() {
     }
   };
 
+  const handleDeleteGoal = async (goalId: number) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      if (!token) return;
+
+      const response = await fetch(`${API_URL}/goals/${goalId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        fetchGoals(token);
+      } else {
+        alert("Failed to delete goal");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   if (loading) {
     return (
       <main className="min-h-screen bg-black text-white flex items-center justify-center">
@@ -163,28 +186,47 @@ export default function GoalsPage() {
             <h2 className="text-2xl font-semibold mb-6">Active Goals</h2>
 
             <div className="flex flex-col gap-4">
-              {goals.map((goal) => (
-                <div
-                  key={goal.id}
-                  className="rounded-xl border border-gray-800 p-5"
-                >
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-semibold">{goal.title}</h3>
-
-                    <p className="text-purple-400 font-medium">
-                      {goal.target_hours} hrs
-                    </p>
-                  </div>
-
-                  <div className="mt-4 flex gap-6 text-sm text-gray-400">
-                    <p>
-                      Start: {new Date(goal.start_date).toLocaleDateString()}
-                    </p>
-
-                    <p>End: {new Date(goal.end_date).toLocaleDateString()}</p>
-                  </div>
+              {goals.length === 0 ? (
+                <div className="text-center py-12 text-gray-400">
+                  No goals yet. Create your first learning goal.
                 </div>
-              ))}
+              ) : (
+                goals.map((goal) => (
+                  <div
+                    key={goal.id}
+                    className="rounded-xl border border-gray-800 p-5"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-xl font-semibold">
+                          {goal.title}
+                        </h3>
+
+                        <p className="text-purple-400 font-medium mt-1">
+                          {goal.target_hours} hrs
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={() => handleDeleteGoal(goal.id)}
+                        className="rounded-lg border border-red-500 px-4 py-2 text-red-400 hover:bg-red-500 hover:text-white transition"
+                      >
+                        Delete
+                      </button>
+                    </div>
+
+                    <div className="mt-4 flex gap-6 text-sm text-gray-400">
+                      <p>
+                        Start: {new Date(goal.start_date).toLocaleDateString()}
+                      </p>
+
+                      <p>
+                        End: {new Date(goal.end_date).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </section>

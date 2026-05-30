@@ -49,10 +49,6 @@ export default function Sidebar() {
           <Link href="/goals" className={navItemClass("/goals")}>
             Goals
           </Link>
-
-          <Link href="/analytics" className={navItemClass("/analytics")}>
-            Analytics
-          </Link>
         </nav>
       </div>
 

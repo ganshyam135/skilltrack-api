@@ -36,7 +36,7 @@ export default function Home() {
         <div className="max-w-5xl">
           <h1 className="text-6xl md:text-7xl font-bold tracking-tight leading-tight">
             Track Your Learning
-            <span className="bg-gradient-to-r from-purple-400 to-blue-500 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-purple-400 to-blue-500 bg-clip-text text-transparent">
               {" "}
               Like Never Before
             </span>

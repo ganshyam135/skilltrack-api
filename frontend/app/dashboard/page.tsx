@@ -4,7 +4,9 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import DashboardCard from "@/components/DashboardCard";
 import WeeklyChart from "@/components/WeeklyChart";
+import AIInsights from "@/components/AIInsights";
 import Sidebar from "@/components/Sidebar";
+import SkillBreakdown from "@/components/SkillBreakdown";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -17,77 +19,94 @@ export default function DashboardPage() {
   const [achievementCount, setAchievementCount] = useState(0);
   const [goalCount, setGoalCount] = useState(0);
   const [weeklyData, setWeeklyData] = useState([]);
+  const [insights, setInsights] = useState<string[]>([]);
+  const [skillBreakdown, setSkillBreakdown] = useState([]);
 
-  const fetchDashboardData = useCallback(async (token: string) => {
-    try {
-      const headers = { Authorization: `Bearer ${token}` };
+  const fetchDashboardData = useCallback(
+    async (token: string) => {
+      try {
+        const headers = { Authorization: `Bearer ${token}` };
 
-      const [
-        totalResponse,
-        streakResponse,
-        achievementResponse,
-        goalsResponse,
-        weeklyResponse,
-      ] = await Promise.all([
-        fetch(`${API_URL}/analytics/total-time`, { headers }),
-        fetch(`${API_URL}/analytics/streak`, { headers }),
-        fetch(`${API_URL}/analytics/achievements`, { headers }),
-        fetch(`${API_URL}/goals`, { headers }),
-        fetch(`${API_URL}/analytics/weekly-summary`, { headers }),
-      ]);
+        const [
+          totalResponse,
+          streakResponse,
+          achievementResponse,
+          goalsResponse,
+          weeklyResponse,
+          aiInsightsResponse,
+          skillBreakdownResponse,
+        ] = await Promise.all([
+          fetch(`${API_URL}/analytics/total-time`, { headers }),
+          fetch(`${API_URL}/analytics/streak`, { headers }),
+          fetch(`${API_URL}/analytics/achievements`, { headers }),
+          fetch(`${API_URL}/goals`, { headers }),
+          fetch(`${API_URL}/analytics/weekly-summary`, { headers }),
+          fetch(`${API_URL}/analytics/ai-insights`, { headers }),
+          fetch(`${API_URL}/analytics/skill-breakdown`, { headers }),
+        ]);
 
-      const responses = [
-        { label: "total time", response: totalResponse },
-        { label: "streak", response: streakResponse },
-        { label: "achievements", response: achievementResponse },
-        { label: "goals", response: goalsResponse },
-        { label: "weekly summary", response: weeklyResponse },
-      ];
+        const responses = [
+          { label: "total time", response: totalResponse },
+          { label: "streak", response: streakResponse },
+          { label: "achievements", response: achievementResponse },
+          { label: "goals", response: goalsResponse },
+          { label: "weekly summary", response: weeklyResponse },
+          { label: "AI insights", response: aiInsightsResponse },
+          { label: "skill breakdown", response: skillBreakdownResponse },
+        ];
 
-      const unauthorized = responses.some(
-        ({ response }) => response.status === 401 || response.status === 403
-      );
+        const unauthorized = responses.some(
+          ({ response }) => response.status === 401 || response.status === 403,
+        );
 
-      if (unauthorized) {
-        localStorage.removeItem("token");
-        router.push("/login");
-        return;
-      }
-
-      for (const { label, response } of responses) {
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(
-            `Failed to fetch ${label}: ${response.status} ${errorText}`
-          );
+        if (unauthorized) {
+          localStorage.removeItem("token");
+          router.push("/login");
+          return;
         }
+
+        for (const { label, response } of responses) {
+          if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(
+              `Failed to fetch ${label}: ${response.status} ${errorText}`,
+            );
+          }
+        }
+
+        const [
+          totalData,
+          streakData,
+          achievementData,
+          goalsData,
+          weeklyDataResponse,
+          aiInsightsData,
+          skillBreakdownData,
+        ] = await Promise.all([
+          totalResponse.json(),
+          streakResponse.json(),
+          achievementResponse.json(),
+          goalsResponse.json(),
+          weeklyResponse.json(),
+          aiInsightsResponse.json(),
+          skillBreakdownResponse.json(),
+        ]);
+
+        setTotalHours((totalData.total_minutes / 60).toFixed(1));
+        setStreak(streakData.current_streak);
+        setAchievementCount(achievementData.achievements.length);
+        setGoalCount(goalsData.length);
+        setWeeklyData(weeklyDataResponse);
+        setInsights(aiInsightsData.insights);
+        setSkillBreakdown(skillBreakdownData);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
       }
-
-      const [
-        totalData,
-        streakData,
-        achievementData,
-        goalsData,
-        weeklyDataResponse,
-      ] = await Promise.all([
-        totalResponse.json(),
-        streakResponse.json(),
-        achievementResponse.json(),
-        goalsResponse.json(),
-        weeklyResponse.json(),
-      ]);
-
-      setTotalHours((totalData.total_minutes / 60).toFixed(1));
-      setStreak(streakData.current_streak);
-      setAchievementCount(achievementData.achievements.length);
-      setGoalCount(goalsData.length);
-      setWeeklyData(weeklyDataResponse);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  }, [router]);
+    },
+    [router],
+  );
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -145,6 +164,14 @@ export default function DashboardPage() {
 
         <section className="px-8 pb-10">
           <WeeklyChart data={weeklyData} />
+        </section>
+
+        <section className="px-8 pb-10">
+          <AIInsights insights={insights} />
+        </section>
+
+        <section className="px-8 pb-10">
+          <SkillBreakdown data={skillBreakdown} />
         </section>
       </div>
     </main>
