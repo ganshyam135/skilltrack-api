@@ -9,6 +9,7 @@ import Sidebar from "@/components/Sidebar";
 import SkillBreakdown from "@/components/SkillBreakdown";
 import RecentActivity from "@/components/RecentActivity";
 import AchievementsCard from "@/components/AchievementsCard";
+import StudyHeatmap from "@/components/StudyHeatmap";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -25,6 +26,7 @@ export default function DashboardPage() {
   const [skillBreakdown, setSkillBreakdown] = useState([]);
   const [recentSessions, setRecentSessions] = useState([]);
   const [achievements, setAchievements] = useState<string[]>([]);
+  const [heatmapData, setHeatmapData] = useState([]);
 
   const fetchDashboardData = useCallback(
     async (token: string) => {
@@ -40,6 +42,7 @@ export default function DashboardPage() {
           aiInsightsResponse,
           skillBreakdownResponse,
           recentSessionsResponse,
+          heatmapResponse,
         ] = await Promise.all([
           fetch(`${API_URL}/analytics/total-time`, { headers }),
           fetch(`${API_URL}/analytics/streak`, { headers }),
@@ -49,6 +52,7 @@ export default function DashboardPage() {
           fetch(`${API_URL}/analytics/ai-insights`, { headers }),
           fetch(`${API_URL}/analytics/skill-breakdown`, { headers }),
           fetch(`${API_URL}/sessions?limit=5`, { headers }),
+          fetch(`${API_URL}/analytics/heatmap`, { headers }),
         ]);
 
         const responses = [
@@ -90,6 +94,7 @@ export default function DashboardPage() {
           aiInsightsData,
           skillBreakdownData,
           recentSessionsData,
+          heatmapData,
         ] = await Promise.all([
           totalResponse.json(),
           streakResponse.json(),
@@ -99,6 +104,7 @@ export default function DashboardPage() {
           aiInsightsResponse.json(),
           skillBreakdownResponse.json(),
           recentSessionsResponse.json(),
+          heatmapResponse.json(),
         ]);
 
         setTotalHours((totalData.total_minutes / 60).toFixed(1));
@@ -109,6 +115,7 @@ export default function DashboardPage() {
         setWeeklyData(weeklyDataResponse);
         setInsights(aiInsightsData.insights);
         setSkillBreakdown(skillBreakdownData);
+        setHeatmapData(heatmapData);
         setRecentSessions(recentSessionsData);
       } catch (error) {
         console.error(error);
@@ -188,8 +195,13 @@ export default function DashboardPage() {
         <section className="px-8 pb-10">
           <RecentActivity sessions={recentSessions} />
         </section>
+
         <section className="px-8 pb-10">
           <AchievementsCard achievements={achievements} />
+        </section>
+
+        <section className="px-8 pb-10">
+          <StudyHeatmap data={heatmapData} />
         </section>
       </div>
     </main>
