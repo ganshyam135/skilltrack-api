@@ -357,13 +357,13 @@ async def get_achievements(
     total_hours = total_minutes / 60
 
     if total_hours >= 10:
-        achievements.append("🎯 10 Hour Learner")
+        achievements.append("10 Hour Learner")
 
     if total_hours >= 50:
-        achievements.append("📚 50 Hour Grinder")
+        achievements.append("50 Hour Grinder")
 
     if total_hours >= 100:
-        achievements.append("🚀 100 Hour Master")
+        achievements.append("100 Hour Master")
 
     # Weekend sessions
     weekend_sessions = 0
@@ -373,7 +373,7 @@ async def get_achievements(
             weekend_sessions += 1
 
     if weekend_sessions >= 5:
-        achievements.append("⚡ Weekend Learner")
+        achievements.append("Weekend Learner")
 
     # Streak achievement
     study_dates = sorted(
@@ -393,10 +393,10 @@ async def get_achievements(
             current_streak = 1
 
     if longest_streak >= 7:
-        achievements.append("🔥 7 Day Warrior")
+        achievements.append("7 Day Warrior")
 
     if longest_streak >= 30:
-        achievements.append("👑 30 Day Legend")
+        achievements.append("30 Day Legend")
 
     return {
         "achievements": achievements

@@ -1,7 +1,7 @@
 "use client";
 
 import Sidebar from "@/components/Sidebar";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
@@ -31,27 +31,7 @@ export default function TopicsPage() {
 
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      router.push("/login");
-    } else {
-      fetchInitialData(token);
-    }
-  }, [router]);
-
-  const fetchInitialData = async (token: string) => {
-    try {
-      await Promise.all([fetchSkills(token), fetchTopics(token)]);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchSkills = async (token: string) => {
+  const fetchSkills = useCallback(async (token: string) => {
     try {
       const response = await fetch(`${API_URL}/skills`, {
         headers: {
@@ -65,9 +45,9 @@ export default function TopicsPage() {
     } catch (error) {
       console.error(error);
     }
-  };
+  }, []);
 
-  const fetchTopics = async (token: string) => {
+  const fetchTopics = useCallback(async (token: string) => {
     try {
       const response = await fetch(`${API_URL}/topics`, {
         headers: {
@@ -81,7 +61,29 @@ export default function TopicsPage() {
     } catch (error) {
       console.error(error);
     }
-  };
+  }, []);
+
+  const fetchInitialData = useCallback(async (token: string) => {
+    try {
+      await Promise.all([fetchSkills(token), fetchTopics(token)]);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchSkills, fetchTopics]);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      router.push("/login");
+    } else {
+      queueMicrotask(() => {
+        void fetchInitialData(token);
+      });
+    }
+  }, [router, fetchInitialData]);
 
   const handleCreateTopic = async () => {
     try {
@@ -109,7 +111,7 @@ export default function TopicsPage() {
         setDescription("");
         setSelectedSkill("");
 
-        fetchTopics(token);
+        void fetchTopics(token);
       } else {
         alert("Failed to create topic");
       }

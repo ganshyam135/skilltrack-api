@@ -1,7 +1,7 @@
 "use client";
 
 import Sidebar from "@/components/Sidebar";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
@@ -12,13 +12,6 @@ type Goal = {
   target_hours: number;
   start_date: string;
   end_date: string;
-};
-
-type GoalProgress = {
-  goal: string;
-  target_hours: number;
-  completed_hours: number;
-  progress_percentage: number;
 };
 
 export default function GoalsPage() {
@@ -34,17 +27,7 @@ export default function GoalsPage() {
 
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      router.push("/login");
-    } else {
-      fetchGoals(token);
-    }
-  }, [router]);
-
-  const fetchGoals = async (token: string) => {
+  const fetchGoals = useCallback(async (token: string) => {
     try {
       const response = await fetch(`${API_URL}/goals`, {
         headers: {
@@ -60,7 +43,19 @@ export default function GoalsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      router.push("/login");
+    } else {
+      queueMicrotask(() => {
+        void fetchGoals(token);
+      });
+    }
+  }, [router, fetchGoals]);
 
   const handleCreateGoal = async () => {
     try {
@@ -90,7 +85,7 @@ export default function GoalsPage() {
         setStartDate("");
         setEndDate("");
 
-        fetchGoals(token);
+        void fetchGoals(token);
       } else {
         alert("Failed to create goal");
       }
@@ -113,7 +108,7 @@ export default function GoalsPage() {
       });
 
       if (response.ok) {
-        fetchGoals(token);
+        void fetchGoals(token);
       } else {
         alert("Failed to delete goal");
       }

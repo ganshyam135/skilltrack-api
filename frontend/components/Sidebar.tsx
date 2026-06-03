@@ -1,68 +1,59 @@
 "use client";
 
 import Link from "next/link";
-
 import { usePathname, useRouter } from "next/navigation";
+
+const navItems = [
+  { href: "/dashboard", label: "Dashboard" },
+  { href: "/skills", label: "Skills" },
+  { href: "/sessions", label: "Study Sessions" },
+  { href: "/goals", label: "Goals" },
+];
 
 export default function Sidebar() {
   const pathname = usePathname();
-
   const router = useRouter();
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-
     router.push("/login");
   };
 
-  const navItemClass = (path: string) => {
-    return `
-      rounded-xl px-4 py-3 transition font-medium
-      ${
-        pathname === path
-          ? "bg-white text-black"
-          : "text-gray-300 hover:bg-gray-900 hover:text-white"
-      }
-    `;
-  };
+  const navItemClass = (path: string) =>
+    [
+      "rounded-lg px-4 py-3 text-sm font-medium transition",
+      pathname === path
+        ? "bg-white text-slate-950"
+        : "text-slate-300 hover:bg-slate-900 hover:text-white",
+    ].join(" ");
 
   return (
-    <aside className="w-72 min-h-screen border-r border-gray-800 bg-black flex flex-col justify-between p-6">
+    <aside className="border-b border-slate-800 bg-slate-950 p-4 lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-72 lg:flex-col lg:justify-between lg:border-b-0 lg:border-r lg:p-6">
       <div>
-        <Link href="/">
-          <h1 className="text-3xl font-bold cursor-pointer">SkillTrack</h1>
+        <Link href="/" className="inline-flex items-center">
+          <span className="text-2xl font-semibold tracking-normal text-white">SkillTrack</span>
         </Link>
 
-        <nav className="mt-10 flex flex-col gap-3">
-          <Link href="/dashboard" className={navItemClass("/dashboard")}>
-            Dashboard
-          </Link>
-
-          <Link href="/skills" className={navItemClass("/skills")}>
-            Skills
-          </Link>
-
-          <Link href="/sessions" className={navItemClass("/sessions")}>
-            Study Sessions
-          </Link>
-
-          <Link href="/goals" className={navItemClass("/goals")}>
-            Goals
-          </Link>
+        <nav className="mt-6 flex gap-2 overflow-x-auto lg:mt-10 lg:flex-col lg:overflow-visible">
+          {navItems.map((item) => (
+            <Link key={item.href} href={item.href} className={navItemClass(item.href)}>
+              {item.label}
+            </Link>
+          ))}
         </nav>
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div className="mt-4 hidden flex-col gap-3 lg:flex">
         <Link
           href="/"
-          className="rounded-xl border border-gray-700 px-4 py-3 text-gray-300 hover:bg-gray-900 hover:text-white transition font-medium"
+          className="rounded-lg border border-slate-700 px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-900 hover:text-white"
         >
           Home
         </Link>
 
         <button
           onClick={handleLogout}
-          className="rounded-xl bg-white text-black px-4 py-3 font-semibold hover:bg-gray-200 transition"
+          className="rounded-lg bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-200"
         >
           Logout
         </button>

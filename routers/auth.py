@@ -11,6 +11,7 @@ from starlette import status
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import jwt, JWTError
 from datetime import datetime, timedelta, timezone
+from config import get_settings
 
 router = APIRouter(
     prefix="/auth",
@@ -23,8 +24,9 @@ bcrypt_context = CryptContext(
 )
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl="auth/login")
 
-SECRET_KEY = "skilltrack-secret-key"
-ALGORITHM = "HS256"
+settings = get_settings()
+SECRET_KEY = settings.token_secret
+ALGORITHM = settings.jwt_algorithm
 
 class Token(BaseModel):
     access_token: str
@@ -137,7 +139,7 @@ async def login_for_access_token(
     token = create_access_token(
         user.username,
         user.id,
-        timedelta(minutes=30)
+        timedelta(minutes=settings.access_token_expire_minutes)
     )
 
     return {

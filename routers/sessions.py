@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Path, Query
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Annotated
 from sqlalchemy.orm import Session
 
@@ -25,7 +25,7 @@ user_dependency = Annotated[Users, Depends(get_current_user)]
 
 
 class CreateSessionRequest(BaseModel):
-    duration: int
+    duration: int = Field(gt=0, le=1440)
     notes: str | None = None
     topic_id: int | None = None
     skill_id: int | None = None
@@ -69,6 +69,9 @@ async def create_session(
 
     db.add(session)
     db.commit()
+    db.refresh(session)
+
+    return session
 
 
 #get all sessions for the topic
@@ -84,6 +87,7 @@ async def get_sessions(
     
     return (db.query(Sessions)
             .filter(Sessions.owner_id == user.id)
+            .order_by(Sessions.created_at.desc())
             .offset(offset)
             .limit(limit)
             .all()
@@ -134,7 +138,7 @@ async def update_session(
 
     session.duration = session_request.duration
     session.notes = session_request.notes
-    session.topic_id = session_request.topic_id
+    session.topics_id = session_request.topic_id
     session.skill_id = session_request.skill_id
 
     db.commit()

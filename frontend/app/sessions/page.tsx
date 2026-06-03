@@ -2,7 +2,7 @@
 
 import Sidebar from "@/components/Sidebar";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
@@ -52,17 +52,43 @@ export default function SessionsPage() {
 
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
+  const fetchSkills = useCallback(async (token: string) => {
+    const response = await fetch(`${API_URL}/skills`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-    if (!token) {
-      router.push("/login");
-    } else {
-      fetchInitialData(token);
-    }
-  }, [router]);
+    const data = await response.json();
 
-  const fetchInitialData = async (token: string) => {
+    setSkills(data);
+  }, []);
+
+  const fetchTopics = useCallback(async (token: string) => {
+    const response = await fetch(`${API_URL}/topics`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    setTopics(data);
+  }, []);
+
+  const fetchSessions = useCallback(async (token: string) => {
+    const response = await fetch(`${API_URL}/sessions`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    setSessions(data);
+  }, []);
+
+  const fetchInitialData = useCallback(async (token: string) => {
     try {
       await Promise.all([
         fetchSkills(token),
@@ -74,43 +100,19 @@ export default function SessionsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [fetchSessions, fetchSkills, fetchTopics]);
 
-  const fetchSkills = async (token: string) => {
-    const response = await fetch(`${API_URL}/skills`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+  useEffect(() => {
+    const token = localStorage.getItem("token");
 
-    const data = await response.json();
-
-    setSkills(data);
-  };
-
-  const fetchTopics = async (token: string) => {
-    const response = await fetch(`${API_URL}/topics`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    const data = await response.json();
-
-    setTopics(data);
-  };
-
-  const fetchSessions = async (token: string) => {
-    const response = await fetch(`${API_URL}/sessions`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    const data = await response.json();
-
-    setSessions(data);
-  };
+    if (!token) {
+      router.push("/login");
+    } else {
+      queueMicrotask(() => {
+        void fetchInitialData(token);
+      });
+    }
+  }, [router, fetchInitialData]);
 
   const filteredTopics = useMemo(() => {
     return topics.filter((topic) => topic.skill_id === Number(selectedSkill));
@@ -142,7 +144,7 @@ export default function SessionsPage() {
 
         setNewTopicDescription("");
 
-        fetchTopics(token);
+        void fetchTopics(token);
       } else {
         alert("Failed to create topic");
       }
@@ -169,7 +171,7 @@ export default function SessionsPage() {
           duration: Number(duration),
           notes,
           skill_id: Number(selectedSkill),
-          topics_id: Number(selectedTopic),
+          topic_id: Number(selectedTopic),
         }),
       });
 
@@ -180,7 +182,7 @@ export default function SessionsPage() {
 
         setSelectedTopic("");
 
-        fetchSessions(token);
+        void fetchSessions(token);
       } else {
         alert("Failed to create session");
       }
@@ -204,7 +206,7 @@ export default function SessionsPage() {
       });
 
       if (response.ok) {
-        fetchSessions(token);
+        void fetchSessions(token);
       } else {
         alert("Failed to delete session");
       }
