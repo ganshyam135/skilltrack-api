@@ -10,6 +10,7 @@ import Sidebar from "@/components/Sidebar";
 import SkillBreakdown from "@/components/SkillBreakdown";
 import StudyHeatmap from "@/components/StudyHeatmap";
 import WeeklyChart from "@/components/WeeklyChart";
+import AIStudyCoach from "@/components/AIStudyCoach";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -86,6 +87,8 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<DashboardData>(emptyDashboardData);
+  const [aiReport, setAiReport] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
 
   const fetchDashboardData = useCallback(async () => {
     const token = localStorage.getItem("token");
@@ -110,17 +113,29 @@ export default function DashboardPage() {
         recentSessions,
         heatmapData,
       ] = await Promise.all([
-        fetchJson<{ total_minutes: number }>(`${API_URL}/analytics/total-time`, token),
+        fetchJson<{ total_minutes: number }>(
+          `${API_URL}/analytics/total-time`,
+          token,
+        ),
         fetchJson<{
           current_streak: number;
           longest_streak: number;
           last_study_date: string | null;
         }>(`${API_URL}/analytics/streak`, token),
-        fetchJson<{ achievements: string[] }>(`${API_URL}/analytics/achievements`, token),
+        fetchJson<{ achievements: string[] }>(
+          `${API_URL}/analytics/achievements`,
+          token,
+        ),
         fetchJson<unknown[]>(`${API_URL}/goals`, token),
         fetchJson<WeeklyPoint[]>(`${API_URL}/analytics/weekly-summary`, token),
-        fetchJson<{ insights: string[] }>(`${API_URL}/analytics/ai-insights`, token),
-        fetchJson<SkillBreakdownPoint[]>(`${API_URL}/analytics/skill-breakdown`, token),
+        fetchJson<{ insights: string[] }>(
+          `${API_URL}/analytics/ai-insights`,
+          token,
+        ),
+        fetchJson<SkillBreakdownPoint[]>(
+          `${API_URL}/analytics/skill-breakdown`,
+          token,
+        ),
         fetchJson<Session[]>(`${API_URL}/sessions?limit=5`, token),
         fetchJson<HeatmapDay[]>(`${API_URL}/analytics/heatmap`, token),
       ]);
@@ -139,13 +154,18 @@ export default function DashboardPage() {
         heatmapData,
       });
     } catch (fetchError) {
-      if (fetchError instanceof Error && fetchError.message === "AUTH_EXPIRED") {
+      if (
+        fetchError instanceof Error &&
+        fetchError.message === "AUTH_EXPIRED"
+      ) {
         localStorage.removeItem("token");
         router.push("/login");
         return;
       }
 
-      setError("Dashboard data could not be loaded. Check that the API is running and try again.");
+      setError(
+        "Dashboard data could not be loaded. Check that the API is running and try again.",
+      );
     } finally {
       setLoading(false);
     }
@@ -156,6 +176,31 @@ export default function DashboardPage() {
       void fetchDashboardData();
     });
   }, [fetchDashboardData]);
+
+  const generateAIReport = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      if (!token) return;
+
+      setAiLoading(true);
+
+      const response = await fetch(`${API_URL}/ai/study-report`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      setAiReport(data.report);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const totalSessions = useMemo(
     () => data.heatmapData.reduce((sum, day) => sum + day.sessions, 0),
@@ -185,10 +230,15 @@ export default function DashboardPage() {
         <header className="border-b border-slate-800 bg-slate-950/95 px-5 py-6 sm:px-8">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-sm font-medium uppercase text-teal-300">Learning Command Center</p>
-              <h1 className="mt-2 text-3xl font-semibold tracking-normal text-white">Dashboard</h1>
+              <p className="text-sm font-medium uppercase text-teal-300">
+                Learning Command Center
+              </p>
+              <h1 className="mt-2 text-3xl font-semibold tracking-normal text-white">
+                Dashboard
+              </h1>
               <p className="mt-2 max-w-2xl text-sm text-slate-400">
-                Track time, consistency, goals, and skill momentum from one workspace.
+                Track time, consistency, goals, and skill momentum from one
+                workspace.
               </p>
             </div>
 
@@ -225,7 +275,11 @@ export default function DashboardPage() {
           ) : null}
 
           <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <DashboardCard title="Study Hours" value={`${data.totalHours} hrs`} detail="Total logged time" />
+            <DashboardCard
+              title="Study Hours"
+              value={`${data.totalHours} hrs`}
+              detail="Total logged time"
+            />
             <DashboardCard
               title="Current Streak"
               value={`${data.streak} days`}
@@ -236,7 +290,11 @@ export default function DashboardPage() {
               value={`${totalSessions}`}
               detail="Across active history"
             />
-            <DashboardCard title="Goals" value={`${data.goalCount}`} detail={`${data.achievementCount} achievements`} />
+            <DashboardCard
+              title="Goals"
+              value={`${data.goalCount}`}
+              detail={`${data.achievementCount} achievements`}
+            />
           </section>
 
           <section className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(360px,1fr)]">
@@ -247,6 +305,14 @@ export default function DashboardPage() {
           <section className="grid grid-cols-1 gap-6 xl:grid-cols-2">
             <SkillBreakdown data={data.skillBreakdown} />
             <StudyHeatmap data={data.heatmapData} />
+          </section>
+
+          <section className="px-8 pb-10">
+            <AIStudyCoach
+              report={aiReport}
+              loading={aiLoading}
+              onGenerate={generateAIReport}
+            />
           </section>
 
           <section className="grid grid-cols-1 gap-6 xl:grid-cols-2">
