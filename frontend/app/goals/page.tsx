@@ -1,6 +1,7 @@
 "use client";
 
 import Sidebar from "@/components/Sidebar";
+import EmptyState from "@/components/EmptyState";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -189,9 +190,11 @@ export default function GoalsPage() {
 
             <div className="flex flex-col gap-4">
               {goals.length === 0 ? (
-                <div className="text-center py-12 text-gray-400">
-                  No goals yet. Create your first learning goal.
-                </div>
+                <EmptyState
+                  title="No goals set yet"
+                  description="Set a goal to give your learning a target window and track progress against planned study time."
+                  actionLabel="Create your first learning goal above."
+                />
               ) : (
                 goals.map((goal) => (
                   <div

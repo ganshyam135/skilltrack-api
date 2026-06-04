@@ -1,6 +1,7 @@
 "use client";
 
 import Sidebar from "@/components/Sidebar";
+import EmptyState from "@/components/EmptyState";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -88,19 +89,22 @@ export default function SessionsPage() {
     setSessions(data);
   }, []);
 
-  const fetchInitialData = useCallback(async (token: string) => {
-    try {
-      await Promise.all([
-        fetchSkills(token),
-        fetchTopics(token),
-        fetchSessions(token),
-      ]);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  }, [fetchSessions, fetchSkills, fetchTopics]);
+  const fetchInitialData = useCallback(
+    async (token: string) => {
+      try {
+        await Promise.all([
+          fetchSkills(token),
+          fetchTopics(token),
+          fetchSessions(token),
+        ]);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [fetchSessions, fetchSkills, fetchTopics],
+  );
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -338,43 +342,51 @@ export default function SessionsPage() {
           <div className="rounded-2xl border border-gray-800 bg-gray-950 p-6">
             <h2 className="text-2xl font-semibold mb-6">Session History</h2>
 
-            <div className="flex flex-col gap-4">
-              {sessions.map((session) => (
-                <div
-                  key={session.id}
-                  className="rounded-xl border border-gray-800 p-5"
-                >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="text-2xl font-semibold">
-                        {session.duration} mins
-                      </h3>
+            {sessions.length === 0 ? (
+              <EmptyState
+                title="No study sessions logged yet"
+                description="Log your first session to start building streaks, activity history, and dashboard insights."
+                actionLabel="Use the Add Study Session form above to record one."
+              />
+            ) : (
+              <div className="flex flex-col gap-4">
+                {sessions.map((session) => (
+                  <div
+                    key={session.id}
+                    className="rounded-xl border border-gray-800 p-5"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h3 className="text-2xl font-semibold">
+                          {session.duration} mins
+                        </h3>
 
-                      <p className="mt-2 text-purple-400">
-                        {getSkillName(session.skill_id)}
-                      </p>
+                        <p className="mt-2 text-purple-400">
+                          {getSkillName(session.skill_id)}
+                        </p>
 
-                      <p className="text-blue-400 text-sm mt-1">
-                        {getTopicName(session.topics_id)}
-                      </p>
+                        <p className="text-blue-400 text-sm mt-1">
+                          {getTopicName(session.topics_id)}
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={() => handleDeleteSession(session.id)}
+                        className="rounded-lg border border-red-500 px-4 py-2 text-red-400 hover:bg-red-500 hover:text-white transition"
+                      >
+                        Delete
+                      </button>
                     </div>
 
-                    <button
-                      onClick={() => handleDeleteSession(session.id)}
-                      className="rounded-lg border border-red-500 px-4 py-2 text-red-400 hover:bg-red-500 hover:text-white transition"
-                    >
-                      Delete
-                    </button>
+                    <p className="mt-4 text-gray-400">{session.notes}</p>
+
+                    <p className="mt-4 text-sm text-gray-500">
+                      {new Date(session.created_at).toLocaleDateString()}
+                    </p>
                   </div>
-
-                  <p className="mt-4 text-gray-400">{session.notes}</p>
-
-                  <p className="mt-4 text-sm text-gray-500">
-                    {new Date(session.created_at).toLocaleDateString()}
-                  </p>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </section>
       </div>

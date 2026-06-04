@@ -1,6 +1,7 @@
 "use client";
 
 import Sidebar from "@/components/Sidebar";
+import EmptyState from "@/components/EmptyState";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -63,15 +64,18 @@ export default function TopicsPage() {
     }
   }, []);
 
-  const fetchInitialData = useCallback(async (token: string) => {
-    try {
-      await Promise.all([fetchSkills(token), fetchTopics(token)]);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  }, [fetchSkills, fetchTopics]);
+  const fetchInitialData = useCallback(
+    async (token: string) => {
+      try {
+        await Promise.all([fetchSkills(token), fetchTopics(token)]);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [fetchSkills, fetchTopics],
+  );
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -195,22 +199,30 @@ export default function TopicsPage() {
           <div className="rounded-2xl border border-gray-800 bg-gray-950 p-6">
             <h2 className="text-2xl font-semibold mb-6">Your Topics</h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              {topics.map((topic) => (
-                <div
-                  key={topic.id}
-                  className="rounded-xl border border-gray-800 p-5"
-                >
-                  <h3 className="text-2xl font-semibold">{topic.title}</h3>
+            {topics.length === 0 ? (
+              <EmptyState
+                title="No topics created yet"
+                description="Topics help break each skill into focused areas so your sessions become easier to track."
+                actionLabel="Create your first topic using the form above."
+              />
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                {topics.map((topic) => (
+                  <div
+                    key={topic.id}
+                    className="rounded-xl border border-gray-800 p-5"
+                  >
+                    <h3 className="text-2xl font-semibold">{topic.title}</h3>
 
-                  <p className="mt-3 text-gray-400">{topic.description}</p>
+                    <p className="mt-3 text-gray-400">{topic.description}</p>
 
-                  <p className="mt-4 text-sm text-purple-400">
-                    {getSkillName(topic.skill_id)}
-                  </p>
-                </div>
-              ))}
-            </div>
+                    <p className="mt-4 text-sm text-purple-400">
+                      {getSkillName(topic.skill_id)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </section>
       </div>

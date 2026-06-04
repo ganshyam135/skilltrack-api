@@ -1,6 +1,7 @@
 "use client";
 
 import Sidebar from "@/components/Sidebar";
+import EmptyState from "@/components/EmptyState";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -166,27 +167,35 @@ export default function SkillsPage() {
           <div className="rounded-2xl border border-gray-800 bg-gray-950 p-6">
             <h2 className="text-2xl font-semibold mb-6">Your Skills</h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              {skills.map((skill) => (
-                <div
-                  key={skill.id}
-                  className="rounded-xl border border-gray-800 p-5 flex flex-col justify-between"
-                >
-                  <div>
-                    <h3 className="text-2xl font-semibold">{skill.name}</h3>
-
-                    <p className="mt-3 text-gray-400">{skill.description}</p>
-                  </div>
-
-                  <button
-                    onClick={() => handleDeleteSkill(skill.id)}
-                    className="mt-6 rounded-xl border border-red-500 text-red-400 px-4 py-2 hover:bg-red-500 hover:text-white transition"
+            {skills.length === 0 ? (
+              <EmptyState
+                title="No skills added yet"
+                description="Create your first skill to start organizing topics, sessions, goals, and progress around it."
+                actionLabel="Use the Create Skill form above to begin."
+              />
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                {skills.map((skill) => (
+                  <div
+                    key={skill.id}
+                    className="rounded-xl border border-gray-800 p-5 flex flex-col justify-between"
                   >
-                    Delete
-                  </button>
-                </div>
-              ))}
-            </div>
+                    <div>
+                      <h3 className="text-2xl font-semibold">{skill.name}</h3>
+
+                      <p className="mt-3 text-gray-400">{skill.description}</p>
+                    </div>
+
+                    <button
+                      onClick={() => handleDeleteSkill(skill.id)}
+                      className="mt-6 rounded-xl border border-red-500 text-red-400 px-4 py-2 hover:bg-red-500 hover:text-white transition"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </section>
       </div>
