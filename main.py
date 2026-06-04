@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 import models
 from database import engine
-from routers import auth, skills, topics, sessions, analytics, goals
+from routers import auth, skills, topics, sessions, analytics, goals, ai
 from config import get_settings
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -29,6 +29,7 @@ app.include_router(topics.router)
 app.include_router(sessions.router)
 app.include_router(analytics.router)
 app.include_router(goals.router)
+app.include_router(ai.router)
 
 @app.get("/")
 async def root():
