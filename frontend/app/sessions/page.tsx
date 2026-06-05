@@ -2,6 +2,7 @@
 
 import Sidebar from "@/components/Sidebar";
 import EmptyState from "@/components/EmptyState";
+import LoadingState from "@/components/LoadingState";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -233,9 +234,10 @@ export default function SessionsPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-black text-white flex items-center justify-center">
-        Loading...
-      </main>
+      <LoadingState
+        title="Loading sessions"
+        description="Preparing your study history, skills, and topics."
+      />
     );
   }
 

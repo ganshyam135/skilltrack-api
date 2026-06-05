@@ -11,6 +11,7 @@ import SkillBreakdown from "@/components/SkillBreakdown";
 import StudyHeatmap from "@/components/StudyHeatmap";
 import WeeklyChart from "@/components/WeeklyChart";
 import AIStudyCoach from "@/components/AIStudyCoach";
+import LoadingState from "@/components/LoadingState";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -214,11 +215,11 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-950 text-white">
-        <div className="rounded-lg border border-slate-800 bg-slate-900 px-5 py-4 text-sm text-slate-300">
-          Loading dashboard...
-        </div>
-      </main>
+      <LoadingState
+        title="Loading dashboard"
+        description="Preparing your study metrics, streaks, charts, and recent activity."
+        variant="dashboard"
+      />
     );
   }
 

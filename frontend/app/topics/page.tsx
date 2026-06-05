@@ -2,6 +2,7 @@
 
 import Sidebar from "@/components/Sidebar";
 import EmptyState from "@/components/EmptyState";
+import LoadingState from "@/components/LoadingState";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -132,9 +133,10 @@ export default function TopicsPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-black text-white flex items-center justify-center">
-        Loading...
-      </main>
+      <LoadingState
+        title="Loading topics"
+        description="Preparing your learning topics and related skills."
+      />
     );
   }
 
