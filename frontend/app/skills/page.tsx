@@ -123,21 +123,21 @@ export default function SkillsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-black text-white flex">
+    <main className="min-h-screen bg-black text-white lg:flex">
       <Sidebar />
 
-      <div className="flex-1">
-        <div className="px-8 py-8 border-b border-gray-800">
-          <h1 className="text-4xl font-bold">Skills</h1>
+      <div className="min-w-0 flex-1">
+        <div className="border-b border-gray-800 px-5 py-6 sm:px-8 sm:py-8">
+          <h1 className="text-3xl font-bold sm:text-4xl">Skills</h1>
 
           <p className="mt-2 text-gray-400">
             Organize and track your learning skills.
           </p>
         </div>
 
-        <section className="p-8">
-          <div className="rounded-2xl border border-gray-800 bg-gray-950 p-6">
-            <h2 className="text-2xl font-semibold">Create Skill</h2>
+        <section className="p-5 sm:p-8">
+          <div className="rounded-2xl border border-gray-800 bg-gray-950 p-5 sm:p-6">
+            <h2 className="text-xl font-semibold sm:text-2xl">Create Skill</h2>
 
             <div className="mt-6 flex flex-col gap-4">
               <input
@@ -145,14 +145,14 @@ export default function SkillsPage() {
                 placeholder="Skill name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="rounded-xl border border-gray-700 bg-black px-4 py-3 outline-none focus:border-purple-500"
+                className="w-full min-w-0 rounded-xl border border-gray-700 bg-black px-4 py-3 outline-none focus:border-purple-500"
               />
 
               <textarea
                 placeholder="Description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="rounded-xl border border-gray-700 bg-black px-4 py-3 outline-none focus:border-purple-500"
+                className="w-full min-w-0 rounded-xl border border-gray-700 bg-black px-4 py-3 outline-none focus:border-purple-500"
               />
 
               <button
@@ -165,9 +165,11 @@ export default function SkillsPage() {
           </div>
         </section>
 
-        <section className="px-8 pb-10">
-          <div className="rounded-2xl border border-gray-800 bg-gray-950 p-6">
-            <h2 className="text-2xl font-semibold mb-6">Your Skills</h2>
+        <section className="px-5 pb-10 sm:px-8">
+          <div className="rounded-2xl border border-gray-800 bg-gray-950 p-5 sm:p-6">
+            <h2 className="mb-6 text-xl font-semibold sm:text-2xl">
+              Your Skills
+            </h2>
 
             {skills.length === 0 ? (
               <EmptyState
@@ -183,9 +185,13 @@ export default function SkillsPage() {
                     className="rounded-xl border border-gray-800 p-5 flex flex-col justify-between"
                   >
                     <div>
-                      <h3 className="text-2xl font-semibold">{skill.name}</h3>
+                      <h3 className="wrap-break-word text-xl font-semibold sm:text-2xl">
+                        {skill.name}
+                      </h3>
 
-                      <p className="mt-3 text-gray-400">{skill.description}</p>
+                      <p className="mt-3 wrap-break-word text-gray-400">
+                        {skill.description}
+                      </p>
                     </div>
 
                     <button

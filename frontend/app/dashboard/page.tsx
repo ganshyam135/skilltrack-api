@@ -260,7 +260,7 @@ export default function DashboardPage() {
           </div>
         </header>
 
-        <div className="space-y-6 p-5 sm:p-8">
+        <div className="space-y-6 p-4 sm:p-6 lg:p-8">
           {error ? (
             <div className="rounded-lg border border-red-900 bg-red-950/40 p-4 text-sm text-red-100">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -308,7 +308,7 @@ export default function DashboardPage() {
             <StudyHeatmap data={data.heatmapData} />
           </section>
 
-          <section className="px-8 pb-10">
+          <section>
             <AIStudyCoach
               report={aiReport}
               loading={aiLoading}

@@ -129,21 +129,21 @@ export default function GoalsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-black text-white flex">
+    <main className="min-h-screen bg-black text-white lg:flex">
       <Sidebar />
 
-      <div className="flex-1">
-        <div className="px-8 py-8 border-b border-gray-800">
-          <h1 className="text-4xl font-bold">Goals</h1>
+      <div className="min-w-0 flex-1">
+        <div className="border-b border-gray-800 px-5 py-6 sm:px-8 sm:py-8">
+          <h1 className="text-3xl font-bold sm:text-4xl">Goals</h1>
 
           <p className="mt-2 text-gray-400">
             Set and manage your learning goals.
           </p>
         </div>
 
-        <section className="p-8">
-          <div className="rounded-2xl border border-gray-800 bg-gray-950 p-6">
-            <h2 className="text-2xl font-semibold">Create Goal</h2>
+        <section className="p-5 sm:p-8">
+          <div className="rounded-2xl border border-gray-800 bg-gray-950 p-5 sm:p-6">
+            <h2 className="text-xl font-semibold sm:text-2xl">Create Goal</h2>
 
             <div className="mt-6 flex flex-col gap-4">
               <input
@@ -151,7 +151,7 @@ export default function GoalsPage() {
                 placeholder="Goal title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="rounded-xl border border-gray-700 bg-black px-4 py-3 outline-none focus:border-purple-500"
+                className="w-full min-w-0 rounded-xl border border-gray-700 bg-black px-4 py-3 outline-none focus:border-purple-500"
               />
 
               <input
@@ -159,21 +159,21 @@ export default function GoalsPage() {
                 placeholder="Target hours"
                 value={targetHours}
                 onChange={(e) => setTargetHours(e.target.value)}
-                className="rounded-xl border border-gray-700 bg-black px-4 py-3 outline-none focus:border-purple-500"
+                className="w-full min-w-0 rounded-xl border border-gray-700 bg-black px-4 py-3 outline-none focus:border-purple-500"
               />
 
               <input
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="rounded-xl border border-gray-700 bg-black px-4 py-3 outline-none focus:border-purple-500"
+                className="w-full min-w-0 rounded-xl border border-gray-700 bg-black px-4 py-3 outline-none focus:border-purple-500"
               />
 
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="rounded-xl border border-gray-700 bg-black px-4 py-3 outline-none focus:border-purple-500"
+                className="w-full min-w-0 rounded-xl border border-gray-700 bg-black px-4 py-3 outline-none focus:border-purple-500"
               />
 
               <button
@@ -186,9 +186,11 @@ export default function GoalsPage() {
           </div>
         </section>
 
-        <section className="px-8 pb-10">
-          <div className="rounded-2xl border border-gray-800 bg-gray-950 p-6">
-            <h2 className="text-2xl font-semibold mb-6">Active Goals</h2>
+        <section className="px-5 pb-10 sm:px-8">
+          <div className="rounded-2xl border border-gray-800 bg-gray-950 p-5 sm:p-6">
+            <h2 className="mb-6 text-xl font-semibold sm:text-2xl">
+              Active Goals
+            </h2>
 
             <div className="flex flex-col gap-4">
               {goals.length === 0 ? (
@@ -203,9 +205,11 @@ export default function GoalsPage() {
                     key={goal.id}
                     className="rounded-xl border border-gray-800 p-5"
                   >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-xl font-semibold">{goal.title}</h3>
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="min-w-0">
+                        <h3 className="wrap-break-word text-xl font-semibold">
+                          {goal.title}
+                        </h3>
 
                         <p className="text-purple-400 font-medium mt-1">
                           {goal.target_hours} hrs
@@ -214,13 +218,13 @@ export default function GoalsPage() {
 
                       <button
                         onClick={() => handleDeleteGoal(goal.id)}
-                        className="rounded-lg border border-red-500 px-4 py-2 text-red-400 hover:bg-red-500 hover:text-white transition"
+                        className="w-full rounded-lg border border-red-500 px-4 py-2 text-red-400 transition hover:bg-red-500 hover:text-white sm:w-auto"
                       >
                         Delete
                       </button>
                     </div>
 
-                    <div className="mt-4 flex gap-6 text-sm text-gray-400">
+                    <div className="mt-4 flex flex-col gap-2 text-sm text-gray-400 sm:flex-row sm:gap-6">
                       <p>
                         Start: {new Date(goal.start_date).toLocaleDateString()}
                       </p>

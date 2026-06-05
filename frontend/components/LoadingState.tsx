@@ -26,7 +26,7 @@ function DashboardSkeleton() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(360px,1fr)]">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
         <div className="rounded-lg border border-slate-800 bg-slate-950 p-6">
           <SkeletonBlock className="h-5 w-36" />
           <SkeletonBlock className="mt-8 h-64 w-full" />
@@ -46,7 +46,7 @@ function DashboardSkeleton() {
 
 function ManagementSkeleton() {
   return (
-    <div className="grid w-full max-w-6xl grid-cols-1 gap-6 xl:grid-cols-[minmax(320px,0.8fr)_minmax(0,1.2fr)]">
+    <div className="grid w-full max-w-6xl grid-cols-1 gap-6 xl:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
       <div className="rounded-lg border border-slate-800 bg-slate-950 p-6">
         <SkeletonBlock className="h-6 w-32" />
         <div className="mt-6 space-y-4">

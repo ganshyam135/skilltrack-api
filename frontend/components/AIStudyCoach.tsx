@@ -12,21 +12,21 @@ export default function AIStudyCoach({
   onGenerate,
 }: AIStudyCoachProps) {
   return (
-    <div className="rounded-2xl border border-gray-800 bg-gray-950 p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-semibold">🤖 AI Study Coach</h2>
+    <div className="rounded-2xl border border-gray-800 bg-gray-950 p-5 sm:p-6">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <h2 className="text-xl font-semibold sm:text-2xl">AI Study Coach</h2>
 
         <button
           onClick={onGenerate}
           disabled={loading}
-          className="rounded-xl bg-purple-600 px-4 py-2 hover:bg-purple-500 transition disabled:opacity-50"
+          className="w-full rounded-xl bg-purple-600 px-4 py-2 transition hover:bg-purple-500 disabled:opacity-50 sm:w-auto"
         >
           {loading ? "Generating..." : "Generate Report"}
         </button>
       </div>
 
       {report ? (
-        <div className="whitespace-pre-wrap text-gray-300 leading-7">
+        <div className="whitespace-pre-wrap wrap-break-word leading-7 text-gray-300">
           {report}
         </div>
       ) : (

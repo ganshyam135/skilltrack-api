@@ -242,27 +242,29 @@ export default function SessionsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-black text-white flex">
+    <main className="min-h-screen bg-black text-white lg:flex">
       <Sidebar />
 
-      <div className="flex-1">
-        <div className="px-8 py-8 border-b border-gray-800">
-          <h1 className="text-4xl font-bold">Study Sessions</h1>
+      <div className="min-w-0 flex-1">
+        <div className="border-b border-gray-800 px-5 py-6 sm:px-8 sm:py-8">
+          <h1 className="text-3xl font-bold sm:text-4xl">Study Sessions</h1>
 
           <p className="mt-2 text-gray-400">
             Track your learning sessions and progress.
           </p>
         </div>
 
-        <section className="p-8 grid grid-cols-1 xl:grid-cols-2 gap-8">
-          <div className="rounded-2xl border border-gray-800 bg-gray-950 p-6">
-            <h2 className="text-2xl font-semibold">Add Study Session</h2>
+        <section className="grid grid-cols-1 gap-6 p-5 sm:p-8 xl:grid-cols-2 xl:gap-8">
+          <div className="rounded-2xl border border-gray-800 bg-gray-950 p-5 sm:p-6">
+            <h2 className="text-xl font-semibold sm:text-2xl">
+              Add Study Session
+            </h2>
 
             <div className="mt-6 flex flex-col gap-4">
               <select
                 value={selectedSkill}
                 onChange={(e) => setSelectedSkill(e.target.value)}
-                className="rounded-xl border border-gray-700 bg-black px-4 py-3"
+                className="w-full min-w-0 rounded-xl border border-gray-700 bg-black px-4 py-3"
               >
                 <option value="">Select Skill</option>
 
@@ -276,7 +278,7 @@ export default function SessionsPage() {
               <select
                 value={selectedTopic}
                 onChange={(e) => setSelectedTopic(e.target.value)}
-                className="rounded-xl border border-gray-700 bg-black px-4 py-3"
+                className="w-full min-w-0 rounded-xl border border-gray-700 bg-black px-4 py-3"
               >
                 <option value="">Select Topic</option>
 
@@ -292,14 +294,14 @@ export default function SessionsPage() {
                 placeholder="Duration in minutes"
                 value={duration}
                 onChange={(e) => setDuration(e.target.value)}
-                className="rounded-xl border border-gray-700 bg-black px-4 py-3"
+                className="w-full min-w-0 rounded-xl border border-gray-700 bg-black px-4 py-3"
               />
 
               <textarea
                 placeholder="Session notes"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="rounded-xl border border-gray-700 bg-black px-4 py-3"
+                className="w-full min-w-0 rounded-xl border border-gray-700 bg-black px-4 py-3"
               />
 
               <button
@@ -311,8 +313,10 @@ export default function SessionsPage() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-gray-800 bg-gray-950 p-6">
-            <h2 className="text-2xl font-semibold">Quick Create Topic</h2>
+          <div className="rounded-2xl border border-gray-800 bg-gray-950 p-5 sm:p-6">
+            <h2 className="text-xl font-semibold sm:text-2xl">
+              Quick Create Topic
+            </h2>
 
             <div className="mt-6 flex flex-col gap-4">
               <input
@@ -320,14 +324,14 @@ export default function SessionsPage() {
                 placeholder="Topic title"
                 value={newTopicTitle}
                 onChange={(e) => setNewTopicTitle(e.target.value)}
-                className="rounded-xl border border-gray-700 bg-black px-4 py-3"
+                className="w-full min-w-0 rounded-xl border border-gray-700 bg-black px-4 py-3"
               />
 
               <textarea
                 placeholder="Topic description"
                 value={newTopicDescription}
                 onChange={(e) => setNewTopicDescription(e.target.value)}
-                className="rounded-xl border border-gray-700 bg-black px-4 py-3"
+                className="w-full min-w-0 rounded-xl border border-gray-700 bg-black px-4 py-3"
               />
 
               <button
@@ -340,9 +344,11 @@ export default function SessionsPage() {
           </div>
         </section>
 
-        <section className="px-8 pb-10">
-          <div className="rounded-2xl border border-gray-800 bg-gray-950 p-6">
-            <h2 className="text-2xl font-semibold mb-6">Session History</h2>
+        <section className="px-5 pb-10 sm:px-8">
+          <div className="rounded-2xl border border-gray-800 bg-gray-950 p-5 sm:p-6">
+            <h2 className="mb-6 text-xl font-semibold sm:text-2xl">
+              Session History
+            </h2>
 
             {sessions.length === 0 ? (
               <EmptyState
@@ -357,9 +363,9 @@ export default function SessionsPage() {
                     key={session.id}
                     className="rounded-xl border border-gray-800 p-5"
                   >
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h3 className="text-2xl font-semibold">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="min-w-0">
+                        <h3 className="text-xl font-semibold sm:text-2xl">
                           {session.duration} mins
                         </h3>
 
@@ -367,20 +373,22 @@ export default function SessionsPage() {
                           {getSkillName(session.skill_id)}
                         </p>
 
-                        <p className="text-blue-400 text-sm mt-1">
+                        <p className="mt-1 wrap-break-word text-sm text-blue-400">
                           {getTopicName(session.topics_id)}
                         </p>
                       </div>
 
                       <button
                         onClick={() => handleDeleteSession(session.id)}
-                        className="rounded-lg border border-red-500 px-4 py-2 text-red-400 hover:bg-red-500 hover:text-white transition"
+                        className="w-full rounded-lg border border-red-500 px-4 py-2 text-red-400 transition hover:bg-red-500 hover:text-white sm:w-auto"
                       >
                         Delete
                       </button>
                     </div>
 
-                    <p className="mt-4 text-gray-400">{session.notes}</p>
+                    <p className="mt-4 wrap-break-word text-gray-400">
+                      {session.notes}
+                    </p>
 
                     <p className="mt-4 text-sm text-gray-500">
                       {new Date(session.created_at).toLocaleDateString()}

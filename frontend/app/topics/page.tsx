@@ -141,21 +141,21 @@ export default function TopicsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-black text-white flex">
+    <main className="min-h-screen bg-black text-white lg:flex">
       <Sidebar />
 
-      <div className="flex-1">
-        <div className="px-8 py-8 border-b border-gray-800">
-          <h1 className="text-4xl font-bold">Topics</h1>
+      <div className="min-w-0 flex-1">
+        <div className="border-b border-gray-800 px-5 py-6 sm:px-8 sm:py-8">
+          <h1 className="text-3xl font-bold sm:text-4xl">Topics</h1>
 
           <p className="mt-2 text-gray-400">
             Manage learning topics under your skills.
           </p>
         </div>
 
-        <section className="p-8">
-          <div className="rounded-2xl border border-gray-800 bg-gray-950 p-6">
-            <h2 className="text-2xl font-semibold">Create Topic</h2>
+        <section className="p-5 sm:p-8">
+          <div className="rounded-2xl border border-gray-800 bg-gray-950 p-5 sm:p-6">
+            <h2 className="text-xl font-semibold sm:text-2xl">Create Topic</h2>
 
             <div className="mt-6 flex flex-col gap-4">
               <input
@@ -163,20 +163,20 @@ export default function TopicsPage() {
                 placeholder="Topic title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="rounded-xl border border-gray-700 bg-black px-4 py-3 outline-none focus:border-purple-500"
+                className="w-full min-w-0 rounded-xl border border-gray-700 bg-black px-4 py-3 outline-none focus:border-purple-500"
               />
 
               <textarea
                 placeholder="Description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="rounded-xl border border-gray-700 bg-black px-4 py-3 outline-none focus:border-purple-500"
+                className="w-full min-w-0 rounded-xl border border-gray-700 bg-black px-4 py-3 outline-none focus:border-purple-500"
               />
 
               <select
                 value={selectedSkill}
                 onChange={(e) => setSelectedSkill(e.target.value)}
-                className="rounded-xl border border-gray-700 bg-black px-4 py-3 outline-none focus:border-purple-500"
+                className="w-full min-w-0 rounded-xl border border-gray-700 bg-black px-4 py-3 outline-none focus:border-purple-500"
               >
                 <option value="">Select Skill</option>
 
@@ -197,9 +197,11 @@ export default function TopicsPage() {
           </div>
         </section>
 
-        <section className="px-8 pb-10">
-          <div className="rounded-2xl border border-gray-800 bg-gray-950 p-6">
-            <h2 className="text-2xl font-semibold mb-6">Your Topics</h2>
+        <section className="px-5 pb-10 sm:px-8">
+          <div className="rounded-2xl border border-gray-800 bg-gray-950 p-5 sm:p-6">
+            <h2 className="mb-6 text-xl font-semibold sm:text-2xl">
+              Your Topics
+            </h2>
 
             {topics.length === 0 ? (
               <EmptyState
@@ -214,9 +216,13 @@ export default function TopicsPage() {
                     key={topic.id}
                     className="rounded-xl border border-gray-800 p-5"
                   >
-                    <h3 className="text-2xl font-semibold">{topic.title}</h3>
+                    <h3 className="wrap-break-word text-xl font-semibold sm:text-2xl">
+                      {topic.title}
+                    </h3>
 
-                    <p className="mt-3 text-gray-400">{topic.description}</p>
+                    <p className="mt-3 wrap-break-word text-gray-400">
+                      {topic.description}
+                    </p>
 
                     <p className="mt-4 text-sm text-purple-400">
                       {getSkillName(topic.skill_id)}
