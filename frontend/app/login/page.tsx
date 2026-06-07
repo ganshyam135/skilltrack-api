@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+// API base URL (use NEXT_PUBLIC_API_URL in environment or fallback to localhost)
+const API_URL = process?.env?.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -19,7 +22,7 @@ export default function LoginPage() {
       formData.append("username", username);
       formData.append("password", password);
 
-      const response = await fetch("http://localhost:8000/auth/login", {
+      const response = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
 
         headers: {

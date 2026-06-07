@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 
+// API base URL (use NEXT_PUBLIC_API_URL in environment or fallback to localhost)
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+
 export default function SignupPage() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -13,7 +16,7 @@ export default function SignupPage() {
     try {
       setLoading(true);
 
-      const response = await fetch("http://localhost:8000/auth/register", {
+      const response = await fetch(`${API_URL}/auth/register`, {
         method: "POST",
 
         headers: {
