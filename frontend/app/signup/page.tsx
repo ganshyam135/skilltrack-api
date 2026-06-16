@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 
-// API base URL (use NEXT_PUBLIC_API_URL in environment or fallback to localhost)
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+// API base URL temporarily hardcoded for production deployment debugging
+const API_URL = "https://skilltrack-jcjy.onrender.com";
 
 export default function SignupPage() {
   const [username, setUsername] = useState("");

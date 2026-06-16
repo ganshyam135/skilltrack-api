@@ -3,9 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-// API base URL (use NEXT_PUBLIC_API_URL in environment or fallback to localhost)
-const API_URL = process?.env?.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-console.log("API_URL =", API_URL);
+// API base URL temporarily hardcoded for production deployment debugging
+const API_URL = "https://skilltrack-jcjy.onrender.com";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
