@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 // API base URL (use NEXT_PUBLIC_API_URL in environment or fallback to localhost)
 const API_URL = process?.env?.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+console.log("API_URL =", API_URL);
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
